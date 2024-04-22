@@ -1,0 +1,76 @@
+.home-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height: 80vh; */
+}
+
+.css-dev-only-do-not-override-2i2tap.ant-btn.ant-btn-lg {
+    height: fit-content; 
+  }
+
+  .custom-text {
+    height: fit-content;
+    font-size: 16px;
+    background-color: #f9dba6;
+    padding: 5px 10px;
+    border-radius: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .custom-text:hover {
+    background-color: #f7cf88;
+  }
+
+  .responsive-button {
+    width: 33%;
+    font-family: "Benton Sans", "Helvetica Neue", helvetica, arial, sans-serif;
+  }
+  
+  .responsive-button .icon {
+    margin-right: 20px;
+    transform: scale(2.0);
+  }
+  
+  .responsive-button .text {
+    font-size: 1.125rem;
+    white-space: nowrap;
+  }
+  
+  .responsive-button .subtext {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  
+  .responsive-button {
+    width: 33%;
+    font-family: "Benton Sans", "Helvetica Neue", helvetica, arial, sans-serif;
+  }
+  
+  .responsive-button .icon {
+    margin-right: 20px;
+    transform: scale(2.0);
+  }
+  
+  .responsive-button .text {
+    font-size: 1.125rem;
+    white-space: nowrap;
+  }
+  
+  .responsive-button .subtext {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 10px;
+    column-count: 2;
+    column-rule: 1px solid rgba(255, 255, 255, 0.3);
+    column-gap: 2em;
+    color: #ccc;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-radius: 4px;
+  }

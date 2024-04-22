@@ -1,0 +1,162 @@
+.light-theme-chat-root {
+    height: calc(100vh - 64px);
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 2rem;
+    position:"relative";
+    background: #c7e1f7;
+  }
+
+.dark-theme-chat-root {
+  height: calc(100vh - 64px);
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 2rem;
+  position:"relative";
+  background: rgb(0, 59, 114);
+}
+  
+  .logo {
+    height: 6em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
+  }
+  
+  .logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+  }
+  
+  .logo.react:hover {
+    filter: drop-shadow(0 0 2em #03c8ffaa);
+  }
+  
+  @keyframes logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    a:nth-of-type(2) .logo {
+      animation: logo-spin infinite 20s linear;
+    }
+  }
+  
+  .rootcard {
+    padding: 2rem;
+  }
+  
+  .rootread-the-docs {
+    color: #888;
+  }
+
+.cs-message--incoming .cs-message__content {
+    color: black;
+    background-color: var(--background-color) !important;
+    border-radius: 0.3em 0.7em 0.7em 0.7em !important;
+}
+
+.light-theme-incoming .cs-message--incoming .cs-message__content {
+  --background-color: #c6e3fa;
+}
+
+.dark-theme-incoming .cs-message--incoming .cs-message__content {
+  --background-color: rgb(82, 172, 255);
+}
+
+
+.cs-message--outgoing .cs-message__content {
+  color: rgba(0,0,0,.87);
+  background-color: var(--background-color) !important;
+  border-radius: 0.7em 0.3em 0.7em 0.7em !important;
+}
+
+.light-theme-noneed-outgoing .cs-message--outgoing .cs-message__content {
+  --background-color: #6ea9d7;
+}
+
+.dark-theme-noneed-outgoing .cs-message--outgoing .cs-message__content {
+  --background-color: #58cc71;
+}
+
+.light-theme-need-outgoing .cs-message--outgoing .cs-message__content {
+  --background-color: transparent;
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #eaeaea;
+  border: none;
+  border-radius: 4px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px dashed #000;
+}
+
+.dark-theme-need-outgoing .cs-message--outgoing .cs-message__content {
+  color: #c6e3fa !important;
+  --background-color: transparent;
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #eaeaea;
+  border: none;
+  border-radius: 4px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px dashed white;
+}
+
+.cs-message-list__scroll-wrapper {
+  box-sizing: border-box;
+  position: absolute;
+  /* top: 15px !important;
+  bottom: 45px !important; */
+  padding-top: 30px !important;
+  padding-bottom: 30px !important;
+  overflow: hidden;
+  padding: 0 1.2em 0 0.8em;
+}
+
+.cs-message-list {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  min-height: 1.25em;
+  position: relative;
+  color: rgba(0,0,0,.87);
+  background-color: var(--background-color1) !important;
+}
+
+.light-theme-messagelist.cs-message-list {
+  --background-color1: #ffffff;
+}
+
+.dark-theme-messagelist.cs-message-list {
+  --background-color1: #001529;
+}
+
+.cs-main-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  overflow: auto;
+  border: solid 1px #d1dbe3;
+  box-sizing: border-box;
+  color: rgba(0,0,0,.87);
+  background-color: white;
+  border-radius: 1.5em 1.5em 1.5em 1.5em !important;
+}
