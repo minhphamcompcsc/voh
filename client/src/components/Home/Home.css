@@ -1,0 +1,90 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    list-style: none;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+.sidebar-home{
+    color: #fff;
+    border-right: 1px solid #d1dbe3;
+}
+
+.sidebar-dark-theme {
+    color: #fff;
+    border-right: 1px solid white; /* Dark theme border style */
+  }
+  
+.sidebar-light-theme {
+    color: #fff;
+    border-right: 1px solid #d1dbe3; /* Light theme border style */
+  }
+
+
+.taskbar-dark-theme {
+    color: #fff;
+    border-bottom: 1px solid white; /* Dark theme border style */
+  }
+  
+.taskbar-light-theme {
+    color: #fff;
+    border-bottom: 1px solid #d1dbe3; /* Light theme border style */
+  }
+
+.logo-home {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    padding: 10px;
+}
+
+.logo-icon-home {
+    width: 40px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border-radius: 50%;
+
+    /* background: rgba(28, 17, 41, 0.88); */
+}
+
+.menu-bar-home {
+    height: 90vh;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 1rem;
+}
+
+.toggle-theme-btn{
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.toggle {
+    margin-left: 15px;
+}
+
+/* Light theme */
+.light-theme {
+    background-color: #ffffff;
+    color: #000000;
+}
+  
+/* Dark theme */
+.dark-theme {
+    background-color: #001529;
+    color: #ffffff;
+}
