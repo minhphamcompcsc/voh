@@ -319,7 +319,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                                               })}}/>}
               style={{
                 borderColor: antdTheme.token.colorBorder,
-                backgroundColor: '#fbf3e4',
+                backgroundColor: '#f6f7fa',
               }}
               bodyStyle={{padding:16}}
               headStyle={{textAlign: 'center'}}
