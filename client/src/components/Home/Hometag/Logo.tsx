@@ -7,7 +7,7 @@ const Logo = () => {
   return (
     <div className='logo-home'>
         <div className='logo-icon-home'>
-            <Link to="https://customer-chat.com/homeContent">
+            <Link to="/">
               <img src={logo} alt="Logo" style={{marginTop: '60px', width: '110%' }}/>
             </Link>
         </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Layout, theme, Tooltip, Avatar } from 'antd';
+import { Button, Layout, theme, Tooltip, Avatar , Modal, Form, Checkbox, Input , Select, type SelectProps, type FormProps} from 'antd';
 import { LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, InfoCircleOutlined, UserOutlined } from '@ant-design/icons'
 import Logo from './Hometag/Logo';
 import MenuList from './Hometag/MenuList';
@@ -15,16 +15,56 @@ import Account from './Hometag/Account';
 import ImageGen from './Hometag/ImageGen';
 import HomeContent from './Hometag/HomeContent'
 import Reason from './Hometag/Reason';
+import { PasswordProps } from 'antd/es/input';
 
 const { Header, Sider} =  Layout;
+type FieldType = {
+  oldpassword: string;
+  newpassword: string;
+};
 
 const Home: React.FC = () => {
-    const [darkTheme, setdarkTheme] = useState(false)
-    const [collapsed, setCollapsed] = useState(false)
-    const [noted, setNoted] = useState(true)
-    const [oldPath, setOldPath] = useState("/")
 
-    console.log("Home")
+  const [darkTheme, setdarkTheme] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+  const [noted, setNoted] = useState(true)
+  const [oldPath, setOldPath] = useState("/")
+
+  const userId = window.localStorage.getItem("userId")
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form] = Form.useForm();
+  
+  const onFinish: FormProps<FieldType>["onFinish"] = async (data) => {
+      const response = await fetch('/api/changepassword/' + userId,{
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+      if (response.ok){
+        alert("Đổi mật khẩu thành công. Vui lòng đăng nhập lại để sử dụng.")
+        logout()
+      }
+      else{
+        alert("Mật khẩu hiện tại không đúng")
+      }
+    // console.log('data: ', data)
+  };
+  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+    console.log('Failed:', errorInfo);
+  };
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+    // console.log("Home")
     
     const location = useLocation();
     const currentRoute = location.pathname;
@@ -130,12 +170,62 @@ const Home: React.FC = () => {
 
                   <div style={{display: 'flex', alignItems: 'center'}}>
                     <div style={{ fontSize: sizeChar.sizeHeader, textAlign: 'center'}}> {localStorage.getItem('name')} </div>
-                    
+
+                    <Button 
+                        size = {'large'} 
+                        type ={"default"}
+                        onClick={showModal}
+                        style={{marginLeft: '15px'}}
+                    >
+                      Đổi mật khẩu
+                    </Button>
+                    <Modal  title="Đổi mật khẩu" 
+                            open={isModalOpen} 
+                            onOk = {handleOk} 
+                            onCancel={handleCancel} 
+                            footer = {() => (
+                              <>
+                              </>
+                            )}
+                    >
+                      <Form form={form}
+                        name="basic"
+                        labelCol={{ span: 8 }}
+                        wrapperCol={{ span: 16 }}
+                        style={{ maxWidth: 600 }}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
+                        autoComplete="off"
+                      >
+                        <Form.Item<FieldType>
+                          label="Mật khẩu hiện tại"
+                          name="oldpassword"
+                          rules={[{ required: true, message: '' }]}
+                        >
+                          <Input type = 'password'/>
+                        </Form.Item>
+
+                        <Form.Item<FieldType>
+                          label="Mật khẩu mới"
+                          name="newpassword"
+                          rules={[{ required: true, message: '' }]}
+                        >
+                          <Input type = 'password'/>
+                        </Form.Item>
+
+                        <Form.Item wrapperCol={{ span: 24 }} style = {{display: 'flex', justifyContent: 'center', marginBottom: 10}}>
+                          <Button type="primary" htmlType="submit" style={{marginRight: 5, paddingLeft: 10, paddingRight: 10}} danger = {true} >
+                            Đổi mật khẩu
+                          </Button>
+                        </Form.Item>
+
+                      </Form>
+                    </Modal>
                     <Button 
                         type='text' 
                         className='toggle'
                         onClick={() => logout()}
-                        icon={collapsed ? <LogoutOutlined className={themeClassName} /> : <LogoutOutlined className={themeClassName} />}
+                        icon={<LogoutOutlined/>}
                     />
                   </div>
                 </Header>

@@ -12,6 +12,8 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 
+bcrypt = Bcrypt(app) 
+
 @app.route('/')
 def index():
     return "success!"
@@ -38,21 +40,21 @@ def authenticate(username : str, password : str):
     # Find the matching account in the database
     account = accounts.find_one(
         {
-            "username": username,
-            "password": password
+            "username": username
         })
     
     if (account == None):
         # If no matching account, return an error
-        return "Tên đăng nhập hoặc mật khẩu không hợp lệ!!!", 404
-    else:
-	    # If there is a matching account, return the account id
-        acc = {
-            "id": str(account['_id']),
-            "name": account['name'],
-            "role": account['role']
-        }
-        return acc
+        return "Tên đăng nhập không hợp lệ!!!", 404
+    elif not bcrypt.check_password_hash(account['password'], password):
+        return "Sai mật khẩu", 404
+        
+    acc = {
+        "id": str(account['_id']),
+        "name": account['name'],
+        "role": account['role']
+    }
+    return acc
 
     # return [str(account['_id']), account['name']]
 
@@ -79,16 +81,206 @@ def getPermission(userId : str):
         return 'btv'
     return 'none'
 
+@app.route('/api/changepassword/<userId>', methods=['POST'])
+def changepassword(userId : str):
+    # print(userId)
+    account = accounts.find_one(
+        {
+			"_id": ObjectId(userId)
+		})
+    if (account == None):
+        return "none", 404
+
+    _account = request.json
+    if not bcrypt.check_password_hash(account['password'], _account['oldpassword']):
+        return "Sai mật khẩu", 404
+    
+    hashed_password = bcrypt.generate_password_hash(_account['newpassword']).decode('utf-8') 
+    accounts.update_one(
+    {
+        "_id" : ObjectId(userId)
+    },
+    {
+        "$set": {
+            "password" : hashed_password,
+        }
+    }
+    )
+
+    return "Đổi mật khẩu thành công!!!", 200
+
+@app.route('/api/addaccount/<userId>', methods=['POST'])
+def addAccount(userId : str):
+    permission = getPermission(userId)
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
+    
+    _account = request.json
+    
+    password = '123456789'
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
+    _account.update({'password' : hashed_password})
+    
+    datetime_now = datetime.now()
+    _account.update({'created_on' : datetime_now})
+    
+    if _account['role'] == 'MC':
+        _account.update({'role' : 'ROLE_MC'})
+    elif _account['role'] == 'Admin':
+        _account.update({'role' : 'ROLE_ADMIN'})
+    elif _account['role'] == 'Thư ký':
+        _account.update({'role' : 'ROLE_DATAENTRY'})
+    elif _account['role'] == 'Thư ký kiêm biên tập viên':
+        _account.update({'role' : 'ROLE_DATAENTRY_EDITOR'})
+    elif _account['role'] == 'Biên tập viên':
+        _account.update({'role' : 'ROLE_EDITOR'})
+
+    accountId =  accounts.insert_one(_account).inserted_id
+    pipeline = [
+        {
+            '$match': {
+                '_id': accountId
+            }
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'username': 1,
+                'name': 1,
+                'phone_number': 1,
+                'role': {
+                    '$cond': {
+                        'if': {'$eq': ['$role', 'ROLE_MC']},
+                        'then': 'MC',
+                        'else': {
+                            '$cond': {
+                                'if': {'$eq': ['$role', 'ROLE_ADMIN']},
+                                'then': 'Admin',
+                                'else': {
+                                    '$cond': {
+                                        'if': {'$eq': ['$role', 'ROLE_DATAENTRY']},
+                                        'then': 'Thư ký',
+                                        'else': {
+                                            '$cond': {
+                                                'if': {'$eq': ['$role', 'ROLE_DATAENTRY_EDITOR']},
+                                                'then': 'Thư ký kiêm biên tập viên',
+                                                'else': {
+                                                    '$cond': {
+                                                        'if': {'$eq': ['$role', 'ROLE_EDITOR']},
+                                                        'then': 'Biên tập viên',
+                                                        'else': '$role'
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                'created_on': {
+                    '$cond': {
+                        'if': {'$eq': [{'$type': '$created_on'}, 'date']},
+                        'then': {
+                            '$dateToString': {
+                                'date': '$created_on',
+                                'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
+                                # 'format': '%Y-%m-%d'  # Adjust the format as needed
+                            }
+                        },
+                        'else': '$created_on'
+                    }
+                }
+            }
+        }
+    ]
+    
+    listCursor = list(accounts.aggregate(pipeline))
+    # print(listCursor)
+
+    jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
+    
+    return jsonData
+
+    # is_valid = bcrypt.check_password_hash(hashed_password, password) 
+    # return
+
 @app.route('/api/admin/accounts/<userId>', methods=['GET'])
 def getAccounts(userId : str):
     # permission = getPermission(userId)
     # if (permission != "admin"):
     #     return "Tài khoản không phải admin", 404
     
-    cursor = accounts.find({}, {"password": 0, "_class": 0}).sort("created_on", 1)
+    # cursor = accounts.find({}, {"password": 0, "_class": 0}).sort("created_on", 1)
     
     # Convert Pymongo cursor to JSON
-    listCursor = list(cursor)
+    # listCursor = list(cursor)
+    # jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
+    
+    pipeline = [
+        {
+            '$sort': {
+                'created_on': -1
+            }
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'username': 1,
+                'name': 1,
+                'phone_number': 1,
+                'role': {
+                    '$cond': {
+                        'if': {'$eq': ['$role', 'ROLE_MC']},
+                        'then': 'MC',
+                        'else': {
+                            '$cond': {
+                                'if': {'$eq': ['$role', 'ROLE_ADMIN']},
+                                'then': 'Admin',
+                                'else': {
+                                    '$cond': {
+                                        'if': {'$eq': ['$role', 'ROLE_DATAENTRY']},
+                                        'then': 'Thư ký',
+                                        'else': {
+                                            '$cond': {
+                                                'if': {'$eq': ['$role', 'ROLE_DATAENTRY_EDITOR']},
+                                                'then': 'Thư ký kiêm biên tập viên',
+                                                'else': {
+                                                    '$cond': {
+                                                        'if': {'$eq': ['$role', 'ROLE_EDITOR']},
+                                                        'then': 'Biên tập viên',
+                                                        'else': '$role'
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                'created_on': {
+                    '$cond': {
+                        'if': {'$eq': [{'$type': '$created_on'}, 'date']},
+                        'then': {
+                            '$dateToString': {
+                                'date': '$created_on',
+                                'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
+                                # 'format': '%Y-%m-%d'  # Adjust the format as needed
+                            }
+                        },
+                        'else': '$created_on'
+                    }
+                }
+            }
+        }
+    ]
+    
+    listCursor = list(accounts.aggregate(pipeline))
+    # print(listCursor)
+
     jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
     
     return jsonData
@@ -296,7 +488,7 @@ def getNews(userId : str):
                     ]
                 },
                 # 'location': '$address_info.name',
-                # 'district': '$address_info.district',
+                'district': '$address_info.district',
                 # 'direction': '$address_info.direction',
                 'state': {
                     '$concat': [
@@ -702,20 +894,20 @@ def updateNews(userId : str):
     )
     return "Tin đã được cập nhật!!!", 200
 
-@app.route('/news/<userId>', methods=['DELETE'])
-def deleteNews(userId : str):
+@app.route('/deleteaccount/<userId>', methods=['DELETE'])
+def deleteAccounts(userId : str):
     permission = getPermission(userId)
-    if (permission != "write"):
-        return "Tài khoản này không thể xóa tin!!!", 403
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
     
-    _news = request.json
-    newsId = _news['_id']['$oid']
-    news.delete_one(
+    _account = request.json
+    accountID = _account['_id']['$oid']
+    accounts.delete_one(
         {
-            "_id" : ObjectId(newsId)
+            "_id" : ObjectId(accountID)
         }   
     )
-    return "Tin đã được xóa", 200
+    return "Account đã được xóa", 200
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)

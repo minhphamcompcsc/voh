@@ -101,14 +101,6 @@ const HomeContent: React.FC<ChatGPTProps> = ({ themeClassName }) => {
                 </div>   
               </div>
             </Button>
-            <Button type={buttonType} block size={'large'} onClick={handleButtonClick} data-key="/nguyennhan" style={{width:sizeChar.sizeButton, margin: 8}}> 
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <FolderViewOutlined style={{ marginRight: sizeChar.sizeMargin, transform: `scale(${sizeChar.sizeImage})` }} />
-                <div>  
-                  <div style={{ fontSize: sizeChar.sizeHeader }}>Nguyên nhân giao thông</div>
-                </div>   
-              </div>
-            </Button>
           </div>
           : null
         } 
