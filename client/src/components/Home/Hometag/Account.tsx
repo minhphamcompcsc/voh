@@ -146,6 +146,8 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
                   })
                   if (response.ok){
                     alert("Xóa tài khoản thành công")
+                    const remainaccounts = accounts.filter((obj) => !rowSelectionModel.includes(obj['_id']['$oid']));
+                    setAccounts(remainaccounts);
                   }
                   else {
                     alert("Không thể xóa tài khoản")
