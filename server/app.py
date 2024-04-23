@@ -109,6 +109,48 @@ def changepassword(userId : str):
 
     return "Đổi mật khẩu thành công!!!", 200
 
+@app.route('/api/deleteaccount/<userId>', methods=['POST'])
+def deleteAccounts(userId : str):
+    permission = getPermission(userId)
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
+    
+    _accounts = request.json
+    # print(_accounts)
+    
+    for accountId in _accounts:
+        accounts.delete_one(
+            {
+                "_id" : ObjectId(accountId)
+            }   
+        )
+
+    return "Account đã được xóa", 200
+
+@app.route('/api/resetpassword/<userId>', methods=['POST'])
+def resetpassword(userId : str):
+    permission = getPermission(userId)
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
+    
+    _accounts = request.json
+    # print(_accounts)
+    for accountId in _accounts:
+        password = '123456789'
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        accounts.update_one(
+            {
+                "_id" : ObjectId(accountId)
+            },
+            {
+                "$set": {
+                    "password" : hashed_password,
+                }
+            }
+        )
+
+    return "Reset password thành công", 200
+
 @app.route('/api/addaccount/<userId>', methods=['POST'])
 def addAccount(userId : str):
     permission = getPermission(userId)
@@ -488,7 +530,16 @@ def getNews(userId : str):
                     ]
                 },
                 # 'location': '$address_info.name',
-                'district': '$address_info.district',
+                # 'district': '$address_info.district',
+                'district': {'$cond': {
+                                'if': {'$isArray': '$address_info.district'},
+                                'then': {'$reduce': {
+                                    'input': '$address_info.district',
+                                    'initialValue': '',
+                                    'in': {'$concat': ['$$value', ' ', {'$toString': '$$this'}]}
+                                }},
+                                'else': {'$toString': '$address_info.district'}
+                            }},
                 # 'direction': '$address_info.direction',
                 'state': {
                     '$concat': [
@@ -502,17 +553,24 @@ def getNews(userId : str):
                 'distance': 1,
                 'notice': 1,
                 'status': 1,
+                # 'created_on': {
+                #     '$cond': {
+                #         'if': {'$eq': [{'$type': '$created_on'}, 'date']},
+                #         'then': {
+                #             '$dateToString': {
+                #                 'date': '$created_on',
+                #                 # 'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
+                #                 'format': '%Y-%m-%d'  # Adjust the format as needed
+                #             }
+                #         },
+                #         'else': '$created_on'
+                #     }
+                # }
                 'created_on': {
                     '$cond': {
                         'if': {'$eq': [{'$type': '$created_on'}, 'date']},
-                        'then': {
-                            '$dateToString': {
-                                'date': '$created_on',
-                                # 'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
-                                'format': '%Y-%m-%d'  # Adjust the format as needed
-                            }
-                        },
-                        'else': '$created_on'
+                        'then': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d'}},
+                        'else': {'$substr': ['$created_on', 0, 10]}
                     }
                 }
             }
@@ -528,10 +586,14 @@ def getNews(userId : str):
 
         pipeline.insert(0, {
             '$match': {
-                'created_on': {
-                    '$gte': start_date,
-                    '$lte': end_date
-                }
+                # 'created_on': {
+                #     '$gte': start_date,
+                #     '$lte': end_date
+                # }
+                '$or': [
+                    {'created_on': {'$gte': start_date, '$lte': end_date}},
+                    {'created_on': {'$gte': start_date.strftime('%Y-%m-%d %H:%M:%S'), '$lte': end_date.strftime('%Y-%m-%d %H:%M:%S')}}
+                ]
             }
         })
 
@@ -893,21 +955,6 @@ def updateNews(userId : str):
         }
     )
     return "Tin đã được cập nhật!!!", 200
-
-@app.route('/deleteaccount/<userId>', methods=['DELETE'])
-def deleteAccounts(userId : str):
-    permission = getPermission(userId)
-    if (permission != "admin"):
-        return "Tài khoản không phải admin", 404
-    
-    _account = request.json
-    accountID = _account['_id']['$oid']
-    accounts.delete_one(
-        {
-            "_id" : ObjectId(accountID)
-        }   
-    )
-    return "Account đã được xóa", 200
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)

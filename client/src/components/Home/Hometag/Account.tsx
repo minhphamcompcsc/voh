@@ -2,7 +2,7 @@ import React from 'react';
 import {useState, useEffect} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import Box from '@mui/material/Box';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef , GridRowSelectionModel } from '@mui/x-data-grid';
 import { Button, Modal, Form, Checkbox, Input , Select, type SelectProps} from 'antd';
 import {UserAddOutlined, UserDeleteOutlined, UndoOutlined, ExclamationOutlined} from '@ant-design/icons'
 import type { FormProps } from 'antd';
@@ -26,6 +26,7 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
   const [accounts, setAccounts] = useState<any[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLine, setSelectedLine] = useState<any>(false)
+  const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
 
   // This uri is used to send request to process CRUD operation of news
   const newsUri = "/api/admin/accounts/" + userId
@@ -54,8 +55,8 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
         body: JSON.stringify(data)
       })
       const _account_ = await response.json()
-      console.log('response: ', _account_)
-      console.log('news: ', accounts)
+      // console.log('response: ', _account_)
+      // console.log('news: ', accounts)
     
       setAccounts([
         _account_[0],
@@ -86,31 +87,26 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
       field: 'name',
       headerName: 'Tên',
       width: 290,
-      editable: true,
     },
     {
       field: 'phone_number',
       headerName: 'Số điện thoại',
-      width: 195,
-      editable: true,
+      flex: 2,
     },
     {
       field: 'username',
       headerName: 'Username',
-      width: 180,
-      editable: true,
+      flex: 2,
     },
     {
       field: 'role',
       headerName: 'Vai trò',
-      width: 250,
-      editable: true,
+      flex: 2,
     },
     {
       field: 'created_on',
       headerName: 'Tạo ngày',
-      width: 150,
-      editable: true,
+      flex: 2,
     },
   ];
 
@@ -120,12 +116,44 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
         <Button icon = {<UserAddOutlined />} size = {'large'} onClick={showModal} type ={"primary"} >
           Thêm tài khoản
         </Button>
-        {/* <Button icon = {<ExclamationOutlined />} size = {'large'}>
+        <Button icon = {<ExclamationOutlined />} 
+                size = {'large'}
+                onClick={async ()=> {
+                  const response = await fetch('/api/resetpassword/' + userId,{
+                    method: "POST",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(rowSelectionModel)
+                  })
+                  if (response.ok){
+                    alert("Reset mật khẩu thành công")
+                  }
+                  else {
+                    alert("Không thể reset mật khẩu")
+                  }
+                }}
+        >
           Reset mật khẩu
         </Button>
-        <Button icon = {<UserDeleteOutlined />} size = {'large'} danger = {true} type ={"primary"}>
+        <Button icon = {<UserDeleteOutlined />}
+                type = 'primary'
+                danger = {true}
+                size = {'large'}
+                onClick={async ()=> {
+                  const response = await fetch('/api/deleteaccount/' + userId,{
+                    method: "POST",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(rowSelectionModel)
+                  })
+                  if (response.ok){
+                    alert("Xóa tài khoản thành công")
+                  }
+                  else {
+                    alert("Không thể xóa tài khoản")
+                  }
+                }}
+        >
           Xóa tài khoản
-        </Button> */}
+        </Button>
 
         <Modal  title="Thêm tài khoản" 
                 open={isModalOpen} 
@@ -221,6 +249,10 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
           pageSizeOptions={[10]}
           checkboxSelection
           disableRowSelectionOnClick
+          onRowSelectionModelChange={(newRowSelectionModel) => {
+            setRowSelectionModel(newRowSelectionModel);
+            console.log('rowSelectionModel: ', rowSelectionModel)
+          }}
         />
       </Box>
 
