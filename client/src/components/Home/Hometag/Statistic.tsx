@@ -42,35 +42,49 @@ function StatisticsPage() {
   // Get unique dates
   const uniqueDates: number[] = Array.from(new Set(news.map(p => p.created_on)));
   const uniqueStates: number[] = Array.from(new Set(news.map(p => p.state)));
+  const uniqueDistricts: number[] = Array.from(new Set(news.map(p => p.district)));
 
   console.log(uniqueDates);
-  console.log(uniqueStates);
+  console.log(uniqueDistricts);
 
   const news_per_date_counts = uniqueDates.map((dates : any) => (
-    // labels: dates,
     news.filter(item => item.created_on === dates).length
   ));
   console.log("news_per_date_counts",news_per_date_counts)
   
-  const news_per_traffic_counts = uniqueStates.map((traffics : any) => ({
+  const news_per_traffic_counts_per_dates = uniqueStates.map((traffics : any) => ({
     label: traffics,
     data: uniqueDates.map((dates : any) => (
       news.filter(item => item.state === traffics)
           .filter(item => item.created_on === dates).length
     ))
   }));
+  console.log("news_per_traffic_counts_per_dates", news_per_traffic_counts_per_dates)
 
-  // console.log("array count", counts)
+  const news_per_traffic_counts_per_district = uniqueStates.map((traffics : any) => ({
+    label: traffics,
+    data: uniqueDistricts.map((districts : any) => (
+      news.filter(item => item.state === traffics)
+          .filter(item => item.district === districts).length
+    ))
+  }));
+  console.log("news_per_traffic_counts_per_district", news_per_traffic_counts_per_district)
 
-  const chartData = {
+  const barchartData = {
     // datasets: news_per_date_counts,
-    labels: uniqueDates,
-    datasets: news_per_traffic_counts
+    labels: uniqueDistricts,
+    datasets: news_per_traffic_counts_per_district
   }
 
-  console.log('chartData: ', chartData)
+  const linechartData = {
+    // datasets: news_per_date_counts,
+    labels: uniqueDates,
+    datasets: news_per_traffic_counts_per_dates
+  }
 
-  const pieChart = {
+  // console.log('chartData: ', chartData)
+
+  const piechartData = {
     // datasets: news_per_date_counts,
     labels: uniqueDates,
     datasets: [{
@@ -84,21 +98,21 @@ function StatisticsPage() {
       key: '1',
       label: <BarChartOutlined />,
       children: <div style={{width: 'auto', height: '550px', display: 'flex', justifyContent: 'center'}}>
-                  <BarChart chartData={chartData} />
+                  <BarChart chartData={barchartData} />
                 </div>,
     },
     {
       key: '2',
       label: <LineChartOutlined />,
       children: <div style={{width: 'auto', height: '550px', display: 'flex', justifyContent: 'center'}}>
-                  <LineChart chartData={chartData} />
+                  <LineChart chartData={linechartData} />
                 </div>,
     },
     {
       key: '3',
       label: <PieChartOutlined />,
       children: <div style={{width: 'auto', height: '550px', display: 'flex', justifyContent: 'center'}}>
-                  <PieChart chartData={pieChart} />
+                  <PieChart chartData={piechartData} />
                 </div>,
     },
   ];
