@@ -44,13 +44,13 @@ function StatisticsPage() {
   const uniqueStates: number[] = Array.from(new Set(news.map(p => p.state)));
   const uniqueDistricts: number[] = Array.from(new Set(news.map(p => p.district)));
 
-  console.log(uniqueDates);
-  console.log(uniqueDistricts);
+  // console.log(uniqueDates);
+  // console.log(uniqueDistricts);
 
   const news_per_date_counts = uniqueDates.map((dates : any) => (
     news.filter(item => item.created_on === dates).length
   ));
-  console.log("news_per_date_counts",news_per_date_counts)
+  // console.log("news_per_date_counts",news_per_date_counts)
   
   const news_per_traffic_counts_per_dates = uniqueStates.map((traffics : any) => ({
     label: traffics,
@@ -59,7 +59,7 @@ function StatisticsPage() {
           .filter(item => item.created_on === dates).length
     ))
   }));
-  console.log("news_per_traffic_counts_per_dates", news_per_traffic_counts_per_dates)
+  // console.log("news_per_traffic_counts_per_dates", news_per_traffic_counts_per_dates)
 
   const news_per_traffic_counts_per_district = uniqueStates.map((traffics : any) => ({
     label: traffics,
@@ -68,7 +68,7 @@ function StatisticsPage() {
           .filter(item => item.district === districts).length
     ))
   }));
-  console.log("news_per_traffic_counts_per_district", news_per_traffic_counts_per_district)
+  // console.log("news_per_traffic_counts_per_district", news_per_traffic_counts_per_district)
 
   const barchartData = {
     // datasets: news_per_date_counts,
