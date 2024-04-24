@@ -109,7 +109,7 @@ def changepassword(userId : str):
         }
     }
     )
-    socketio.emit('change_password', userId)
+    # socketio.emit('change_password', userId)
     return "Đổi mật khẩu thành công!!!", 200
 
 @app.route('/api/deleteaccount/<userId>', methods=['POST'])
