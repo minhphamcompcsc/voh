@@ -13,7 +13,8 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-CORS(app,resources={r"/*":{"origins":"*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
+# CORS(app)
 socketio = SocketIO(app,cors_allowed_origins="*")
 
 bcrypt = Bcrypt(app) 
@@ -108,7 +109,7 @@ def changepassword(userId : str):
         }
     }
     )
-
+    # socketio.emit('change_password', userId)
     return "Đổi mật khẩu thành công!!!", 200
 
 @app.route('/api/deleteaccount/<userId>', methods=['POST'])
@@ -252,9 +253,9 @@ def addAccount(userId : str):
 
 @app.route('/api/admin/accounts/<userId>', methods=['GET'])
 def getAccounts(userId : str):
-    # permission = getPermission(userId)
-    # if (permission != "admin"):
-    #     return "Tài khoản không phải admin", 404
+    permission = getPermission(userId)
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
     
     # cursor = accounts.find({}, {"password": 0, "_class": 0}).sort("created_on", 1)
     
@@ -334,6 +335,10 @@ def getCTV(userId : str):
     # permission = getPermission(userId)
     # if (permission == "mc" or permission == 'none'):
     #     return "Tài khoản không hợp lệ", 404
+    permission = getPermission(userId)
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
+    
     pipeline = [
         {
             '$project': {
@@ -358,6 +363,9 @@ def getAddress(userId : str):
     # permission = getPermission(userId)
     # if (permission == "mc" or permission == 'none'):
     #     return "Tài khoản không hợp lệ", 404
+    permission = getPermission(userId)
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
     pipeline = [
         {
             '$project': {
@@ -399,6 +407,10 @@ def getSpeed(userId : str):
     # permission = getPermission(userId)
     # if (permission == "mc" or permission == 'none'):
     #     return "Tài khoản không hợp lệ", 404
+    permission = getPermission(userId)
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
+    
     pipeline = [
         {
             '$project': {
@@ -424,6 +436,10 @@ def getReason(userId : str):
     # permission = getPermission(userId)
     # if (permission == "mc" or permission == 'none'):
     #     return "Tài khoản không hợp lệ", 404
+    permission = getPermission(userId)
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
+    
     pipeline = [
         {
             '$project': {
@@ -448,6 +464,10 @@ def getNews(userId : str):
         return "Tài khoản không tồn tại", 404
 # @app.route('/api/news', methods=['GET'])
 # def getNews():
+
+    permission = getPermission(userId)
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
 
     pipeline = [
         {
@@ -721,6 +741,9 @@ def addNews(userId : str):
     if (permission == "mc"):
         return "Tài khoản này không thể thêm tin!!!", 403
     
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
+    
     datetime_now = datetime.now()
     _news = request.json
     _news.update({'created_on' : datetime_now})
@@ -941,6 +964,10 @@ def addNews(userId : str):
 
 @app.route('/api/updatenews/<userId>', methods=['PATCH'])
 def updateNews(userId : str):
+    permission = getPermission(userId)
+    if (permission == "none"):
+        return "Tài khoản không tồn tại", 404
+    
     _news = request.json
     newsId = _news['_id']['$oid']
     news.update_one(

@@ -13,9 +13,9 @@ import axios from 'axios';
 import type { Dayjs } from 'dayjs';
 
 const { RangePicker } = DatePicker;
-const onChange = (key: string) => {
-  console.log(key);
-};
+// const onChange = (key: string) => {
+//   console.log(key);
+// };
 
 function StatisticsPage() {
   const userId = window.localStorage.getItem("userId")
@@ -168,7 +168,7 @@ function StatisticsPage() {
               //         paddingLeft: 8}}
         >
           <Tabs
-            onChange={onChange}
+            // onChange={onChange}
             type="card"
             items = {items}
           />
