@@ -450,14 +450,6 @@ def getNews(userId : str):
 # def getNews():
 
     pipeline = [
-        # {
-        #     '$match': {
-        #         'created_on': {
-        #             '$gte': start_date,
-        #             '$lte': end_date
-        #         }
-        #     }
-        # },
         {
             '$sort': {
                 'created_on': -1
@@ -583,7 +575,10 @@ def getNews(userId : str):
         date_range = request.json
 
         # Convert the date strings to datetime objects
-        start_date = datetime.strptime(date_range[0], '%Y-%m-%d') - timedelta(days=1)
+        # start_date = datetime.strptime(date_range[0], '%Y-%m-%d') - timedelta(days=1)
+        # end_date = datetime.strptime(date_range[1], '%Y-%m-%d') + timedelta(days=1)
+        
+        start_date = datetime.strptime(date_range[0], '%Y-%m-%d')
         end_date = datetime.strptime(date_range[1], '%Y-%m-%d') + timedelta(days=1)
 
         pipeline.insert(0, {

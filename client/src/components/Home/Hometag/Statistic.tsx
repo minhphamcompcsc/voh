@@ -32,7 +32,10 @@ function StatisticsPage() {
         body: JSON.stringify(dateRangeString)
       })
       const _news_ = await _news.json()
-      setNews(_news_.reverse())
+      
+      const to_remove = ['Nháp', 'Lưu trữ']
+      const remain_news = _news_.filter((obj : any) => !to_remove.includes(obj['status']));
+      setNews(remain_news.reverse())
     }
     fetchData()
   }, [])
@@ -96,21 +99,21 @@ function StatisticsPage() {
   const items: TabsProps['items'] = [
     {
       key: '1',
-      label: <BarChartOutlined />,
+      label: <div><BarChartOutlined /> Theo quận </div>,
       children: <div style={{width: 'auto', height: '550px', display: 'flex', justifyContent: 'center'}}>
                   <BarChart chartData={barchartData} />
                 </div>,
     },
     {
       key: '2',
-      label: <LineChartOutlined />,
+      label: <div> <LineChartOutlined /> Theo ngày </div>,
       children: <div style={{width: 'auto', height: '550px', display: 'flex', justifyContent: 'center'}}>
                   <LineChart chartData={linechartData} />
                 </div>,
     },
     {
       key: '3',
-      label: <PieChartOutlined />,
+      label: <div> <PieChartOutlined /> Tổng theo ngày </div>,
       children: <div style={{width: 'auto', height: '550px', display: 'flex', justifyContent: 'center'}}>
                   <PieChart chartData={piechartData} />
                 </div>,
