@@ -67,20 +67,20 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
   // This function fetches news that the current user can view
   // and their permission
   async function fetchData() {
-    console.log("fetchData")
+    // console.log("fetchData")
     const _ctv = await fetch(ctvUri,{
       method: "GET",
     })
     const _ctv_ = await _ctv.json()
     setCTV(_ctv_)
 
-    const _news = await fetch(newsUri,{
-      method: "POST",
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify((dateRangeString[0] == '' || dateRangeString[1] == '')? null : dateRangeString)
-    })
-    const _news_ = await _news.json()
-    setNews(_news_)
+    // const _news = await fetch(newsUri,{
+    //   method: "POST",
+    //   headers: {'Content-Type': 'application/json'},
+    //   body: JSON.stringify((dateRangeString[0] == '' || dateRangeString[1] == '')? null : dateRangeString)
+    // })
+    // const _news_ = await _news.json()
+    // setNews(_news_)
 
     const _address = await fetch(adrUri,{
       method: "GET",
@@ -111,8 +111,30 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     setNews(_news_)
     console.log('news: ', news)
   }
+
+  function handleUpdateNews(_new_ : any){
+      setNews(prevNews => [
+        ...prevNews
+      ])
+      console.log('news before update: ', news);
+      console.log('news update hear from socket:', _new_);
+      let updatedNews = news
+      // console.log('updatedNews at first:', updatedNews);
+      updatedNews = news.map((obj) =>{
+        if (obj['_id']== _new_[0]['_id']['$oid']) {
+        // console.log('obj[_id]:', obj['_id']);
+        // console.log('new[0][_id]:', _new_[0]['_id']);
+        return _new_[0]
+      }
+      else return obj
+      });
+      // console.log('updatedNews:', updatedNews);
+      setNews(updatedNews);
+  }
+
   useEffect(() => {
     fetchData()
+    getNews()
     const socket = io("http://127.0.0.1:5000", {
       transports: ["websocket"]
     });
@@ -122,11 +144,44 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
         _new_[0],
         ...prevNews
       ])
+      fetchData()
     });
 
     // socket.on("update_news", (_new_) => {
     //   console.log('news updated: ', _new_)
     // });
+    // socket.on("update_news", (_new_) => {
+    //   setNews(prevNews => [
+    //   ...prevNews
+    //   ])
+    //   // console.log('news before update: ', news);
+    //   // console.log('news update hear from socket:', _new_);
+    //   let updatedNews = news
+    //   // console.log('updatedNews at first:', updatedNews);
+    //   updatedNews = news.map((obj) =>{
+    //     if (obj['_id']== _new_[0]['_id']['$oid']) {
+    //     // console.log('obj[_id]:', obj['_id']);
+    //     // console.log('new[0][_id]:', _new_[0]['_id']);
+    //     return _new_[0]
+    //   }
+    //   else return obj
+    //   });
+    //   // console.log('updatedNews:', updatedNews);
+    //   setNews(updatedNews);
+    // });
+    
+    socket.on("update_news", (_new_) => {
+      setNews(prevNews => {
+        const updatedNews = prevNews.map(obj => {
+          if (obj['_id']['$oid'] == _new_[0]['_id']['$oid']) {
+            return _new_[0];
+          } else {
+            return obj;
+          }
+        });
+        return updatedNews;
+      });
+    });
 
     return function cleanup() {
       socket.disconnect();
@@ -251,7 +306,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
               })
               const _news_ = await response.json()
               setNews(_news_)
-              console.log('news: ', news)
+              // console.log('news: ', news)
               // if(response.ok) {
               //   alert("Filter tin theo ngày thành công")
               // } else {
