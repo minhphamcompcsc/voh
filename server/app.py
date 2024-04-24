@@ -2,15 +2,19 @@ from flask import Flask, request, jsonify, session
 from flask_session import Session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
-
+import json
 from pymongo import MongoClient
 from bson.json_util import dumps
+from bson import json_util
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+CORS(app,resources={r"/*":{"origins":"*"}})
+socketio = SocketIO(app,cors_allowed_origins="*")
 
 bcrypt = Bcrypt(app) 
 
@@ -31,8 +35,6 @@ addresses = db['address']
 sharers = db['person_sharing']
 reasons = db['reason']
 traffic_state = db['speed']
-
-
 
 # Authenticate a login attempt with input username and password
 @app.route('/api/authenticate/<username>/<password>', methods=['POST'])
@@ -740,9 +742,9 @@ def addNews(userId : str):
         _news.update({'reason': ''})
     if 'notice' not in _news:
         _news.update({'notice': ''})
-    print(_news)
+    # print(_news)
 
-    sharer = sharers.find_one({'name': _news['personSharing']}) if _news['phone_number'] == '' else sharers.find_one({'phone_number': _news['phone_number']})
+    sharer = sharers.find_one({'name': _news['personSharing'], 'phone_number': _news['phone_number']}) if (_news['phone_number'] != '' and _news['personSharing'] != '') else sharers.find_one({'name': _news['personSharing']}) if _news['phone_number'] == '' else sharers.find_one({'phone_number': _news['phone_number']})
 
     if not sharer:
         # Create a new company document
@@ -935,8 +937,11 @@ def addNews(userId : str):
     listCursor = list(news.aggregate(pipeline))
     
     jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
-    
-    # print(jsonData)
+    jsonData_str = jsonData.decode('utf8')
+    json_obj = json.loads(jsonData_str)
+
+    socketio.emit('add_news', json_obj)
+    # print('json_obj: ',json_obj)
     return jsonData
 
 @app.route('/api/updatenews/<userId>', methods=['PATCH'])
@@ -954,8 +959,125 @@ def updateNews(userId : str):
             }
         }
     )
+
+    pipeline = [
+        {
+            '$match': {
+                "_id" : ObjectId(newsId)
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'person_sharing',
+                'localField': 'personSharing.$id',
+                'foreignField': '_id',
+                'as': 'person_sharing_info'
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'address',
+                'localField': 'address.$id',
+                'foreignField': '_id',
+                'as': 'address_info'
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'speed',
+                'localField': 'speed.$id',
+                'foreignField': '_id',
+                'as': 'speed_info'
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'reason',
+                'localField': 'reason.$id',
+                'foreignField': '_id',
+                'as': 'reason_info'
+            }
+        },
+        {
+            '$unwind': '$person_sharing_info'
+        },
+        {
+            '$unwind': '$address_info'
+        },
+        {
+            '$unwind': '$speed_info'
+        },
+        {
+            '$unwind': '$reason_info'
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'ctv': {'$concat': [{"$ifNull": [ '$person_sharing_info.name', ""]}, ' ', { "$ifNull": [ '$person_sharing_info.phone_number', "" ] }]},
+                # 'ctv': '$person_sharing_info.name',
+                # 'ctv_phone': '$person_sharing_info.phone_number',
+                'location': {
+                    '$concat': [
+                        {'$ifNull': ['$address_info.name', '']}, 
+                        {'$ifNull': [{'$concat': [' tới ', '$address_info.direction']}, '']},
+                        {'$ifNull': [
+                            { '$concat': [ ' tại ', {'$cond': {
+                                'if': {'$isArray': '$address_info.district'},
+                                'then': {'$reduce': {
+                                    'input': '$address_info.district',
+                                    'initialValue': '',
+                                    'in': {'$concat': ['$$value', ' ', {'$toString': '$$this'}]}
+                                }},
+                                'else': {'$toString': '$address_info.district'}
+                            }}]},
+                            ''
+                        ]},
+                    ]
+                },
+                # 'location': '$address_info.name',
+                # 'district': '$address_info.district',
+                # 'direction': '$address_info.direction',
+                'state': {
+                    '$concat': [
+                        {'$ifNull': ['$speed_info.name', '']}, 
+                        {'$ifNull': [{'$concat': [ ' ', {'$toString': '$speed_info.value'}, ' km/h']}, '']},
+                    ]
+                },
+                # 'state': '$speed_info.name',
+                # 'speed': '$speed_info.value',
+                'reason': '$reason_info.name',
+                'distance': 1,
+                'notice': 1,
+                'status': 1,
+                'created_on': {
+                    '$cond': {
+                        'if': {'$eq': [{'$type': '$created_on'}, 'date']},
+                        'then': {
+                            '$dateToString': {
+                                'date': '$created_on',
+                                # 'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
+                                'format': '%Y-%m-%d'  # Adjust the format as needed
+                            }
+                        },
+                        'else': '$created_on'
+                    }
+                }
+            }
+        }
+    ]
+
+    listCursor = list(news.aggregate(pipeline))
+    
+    jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
+
+    jsonData_str = jsonData.decode('utf8')
+    json_obj = json.loads(jsonData_str)
+
+    socketio.emit('update_news', json_obj)
+
     return "Tin đã được cập nhật!!!", 200
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+    # app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+    socketio.run(app, debug=True,port=5000)
 

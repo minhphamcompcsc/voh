@@ -11,6 +11,8 @@ import moment from 'moment';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import type { Dayjs } from 'dayjs';
+import { io } from "socket.io-client";
+import socketIOClient from 'socket.io-client';
 
 interface Bulletin {
   themeClassName: string;
@@ -111,9 +113,27 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
   }
   useEffect(() => {
     fetchData()
+    const socket = io("http://127.0.0.1:5000", {
+      transports: ["websocket"]
+    });
+
+    socket.on("add_news", (_new_) => {
+      setNews(prevNews => [
+        _new_[0],
+        ...prevNews
+      ])
+    });
+
+    // socket.on("update_news", (_new_) => {
+    //   console.log('news updated: ', _new_)
+    // });
+
+    return function cleanup() {
+      socket.disconnect();
+    };
   }, [])
 
-  console.log("dateRangeString", dateRangeString)
+  // console.log("dateRangeString", dateRangeString)
   const onFinish: FormProps<FieldType>["onFinish"] = async (data) => {
     const response = await fetch('/api/addnews/' + userId,{
       method: "POST",
