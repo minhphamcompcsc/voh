@@ -196,13 +196,13 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
       body: JSON.stringify(data)
     })
     const _news_ = await response.json()
-    console.log('response: ', _news_)
-    console.log('news: ', news)
+    // console.log('response: ', _news_)
+    // console.log('news: ', news)
 
-    setNews([
-      _news_[0],
-      ...news
-    ])
+    // setNews([
+    //   _news_[0],
+    //   ...news
+    // ])
   };
 
   const columns: GridColDef<(typeof news)[number]>[] = [
@@ -347,7 +347,6 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                 },
                 columns: {
                   columnVisibilityModel: {
-                    notice: readOnly,
                     direction: false,
                     distance: false,
                   },

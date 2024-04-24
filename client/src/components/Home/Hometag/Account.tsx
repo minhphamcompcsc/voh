@@ -119,16 +119,19 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
         <Button icon = {<ExclamationOutlined />} 
                 size = {'large'}
                 onClick={async ()=> {
-                  const response = await fetch('/api/resetpassword/' + userId,{
-                    method: "POST",
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(rowSelectionModel)
-                  })
-                  if (response.ok){
-                    alert("Reset mật khẩu thành công")
-                  }
-                  else {
-                    alert("Không thể reset mật khẩu")
+                  if (rowSelectionModel.length != 0) {
+                    const response = await fetch('/api/resetpassword/' + userId,{
+                      method: "POST",
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify(rowSelectionModel)
+                    })
+                    if (response.ok){
+                      alert("Reset mật khẩu thành công")
+                      setRowSelectionModel([])
+                    }
+                    else {
+                      alert("Không thể reset mật khẩu")
+                    }
                   }
                 }}
         >
@@ -139,18 +142,21 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
                 danger = {true}
                 size = {'large'}
                 onClick={async ()=> {
-                  const response = await fetch('/api/deleteaccount/' + userId,{
-                    method: "POST",
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(rowSelectionModel)
-                  })
-                  if (response.ok){
-                    alert("Xóa tài khoản thành công")
-                    const remainaccounts = accounts.filter((obj) => !rowSelectionModel.includes(obj['_id']['$oid']));
-                    setAccounts(remainaccounts);
-                  }
-                  else {
-                    alert("Không thể xóa tài khoản")
+                  if (rowSelectionModel.length != 0) {
+                    const response = await fetch('/api/deleteaccount/' + userId,{
+                      method: "POST",
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify(rowSelectionModel)
+                    })
+                    if (response.ok){
+                      alert("Xóa tài khoản thành công")
+                      const remainaccounts = accounts.filter((obj) => !rowSelectionModel.includes(obj['_id']['$oid']));
+                      setAccounts(remainaccounts);
+                      setRowSelectionModel([])
+                    }
+                    else {
+                      alert("Không thể xóa tài khoản")
+                    }
                   }
                 }}
         >
@@ -253,7 +259,7 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
           disableRowSelectionOnClick
           onRowSelectionModelChange={(newRowSelectionModel) => {
             setRowSelectionModel(newRowSelectionModel);
-            console.log('rowSelectionModel: ', rowSelectionModel)
+            // console.log('rowSelectionModel: ', rowSelectionModel)
           }}
         />
       </Box>

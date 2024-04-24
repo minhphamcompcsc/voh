@@ -1,6 +1,6 @@
 export const Districts = [
-    {value: 'Thành phố Thủ Đức'},
-	{value: 'Thành phố Bình Dương'},
+    {value: 'Thủ Đức'},
+	{value: 'Bình Dương'},
     {value: 'Quận 1'},
 	{value: 'Quận 2'},
 	{value: 'Quận 3'},
@@ -24,5 +24,5 @@ export const Districts = [
 	{value: 'Huyện Củ Chi'}, 
 	{value: 'Huyện Hóc Môn'},
 	{value: 'Huyện Nhà Bè'},
-	{value: 'Chưa rõ'} 
+	{value: 'Quận khác'} 
 ]
