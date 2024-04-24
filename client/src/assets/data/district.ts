@@ -1,5 +1,6 @@
 export const Districts = [
     {value: 'Thành phố Thủ Đức'},
+	{value: 'Thành phố Bình Dương'},
     {value: 'Quận 1'},
 	{value: 'Quận 2'},
 	{value: 'Quận 3'},
