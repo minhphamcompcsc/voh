@@ -108,28 +108,16 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
       body: JSON.stringify((dateRangeString[0] == '' || dateRangeString[1] == '')? null : dateRangeString)
     })
     const _news_ = await response.json()
+
+    // let tempNews = _news_
+    // if (role == 'ROLE_MC') {
+    //   const to_remove = ['Nháp', 'Lưu trữ']
+    //   tempNews = tempNews.filter((obj : any) => !to_remove.includes(obj['status']));
+    // }
+    // setNews(tempNews)
+
     setNews(_news_)
     console.log('news: ', news)
-  }
-
-  function handleUpdateNews(_new_ : any){
-      setNews(prevNews => [
-        ...prevNews
-      ])
-      console.log('news before update: ', news);
-      console.log('news update hear from socket:', _new_);
-      let updatedNews = news
-      // console.log('updatedNews at first:', updatedNews);
-      updatedNews = news.map((obj) =>{
-        if (obj['_id']== _new_[0]['_id']['$oid']) {
-        // console.log('obj[_id]:', obj['_id']);
-        // console.log('new[0][_id]:', _new_[0]['_id']);
-        return _new_[0]
-      }
-      else return obj
-      });
-      // console.log('updatedNews:', updatedNews);
-      setNews(updatedNews);
   }
 
   useEffect(() => {
@@ -179,6 +167,25 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
             return obj;
           }
         });
+        // const firstupdatedNews = prevNews.map(obj => {
+        //   if (obj['_id']['$oid'] == _new_[0]['_id']['$oid']) {
+        //     return _new_[0];
+        //   } else {
+        //     return obj;
+        //   }
+        // });
+        // const updatedNews = firstupdatedNews.filter(obj => {
+        //   if (obj['_id']['$oid'] === _new_[0]['_id']['$oid']) {
+        //     if (role === 'ROLE_MC' && (_new_[0]['status'] === 'Nháp' || _new_[0]['status'] === 'Lưu trữ')) {
+        //       return false; // Remove the element from the array
+        //     } else {
+        //       return true; // Keep the element in the array
+        //     }
+        //   } else {
+        //     return true; // Keep the element in the array
+        //   }
+        // });
+
         return updatedNews;
       });
     });
@@ -204,6 +211,21 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     //   ...news
     // ])
   };
+
+  let statusChoice = ['Nháp', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ']
+  if (role == 'ROLE_MC'){
+    statusChoice = ['Chờ đọc', 'Đã đọc', 'Không đọc']
+  }
+  else if (role == 'ROLE_DATAENTRY' || role == 'ROLE_DATAENTRY_EDITOR' || role == 'ROLE_EDITOR'){
+    statusChoice = ['Nháp', 'Chờ đọc', 'Lưu trữ']
+  }
+
+  // let tempNews = news
+  // if (role == 'ROLE_MC') {
+  //   const to_remove = ['Nháp', 'Lưu trữ']
+  //   tempNews = tempNews.filter((obj : any) => !to_remove.includes(obj['status']));
+  // }
+  // setNews(tempNews)
 
   const columns: GridColDef<(typeof news)[number]>[] = [
     {
@@ -255,7 +277,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
       field: 'status',
       headerName: 'Trạng thái',
       type: 'singleSelect',
-      valueOptions: ['Nháp', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ'],
+      valueOptions: statusChoice,
       editable: true,
       flex: 1.5,
     },
