@@ -53,8 +53,8 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
   const [address, setAddress] = useState<any[]>([])
   const [speeds, setSpeeds] = useState<any[]>([])
   const [reasons, setReasons] = useState<any[]>([])
-  const [dateRange, setDateRange] = useState<RangeValue>([dayjs().subtract(7, 'days'), dayjs()]);
-  const [dateRangeString, setDateRangeString] = useState<any[]>([dayjs().subtract(7, 'days').format('YYYY-MM-DD'), dayjs().format('YYYY-MM-DD')]);
+  const [dateRange, setDateRange] = useState<RangeValue>([dayjs(), dayjs()]);
+  const [dateRangeString, setDateRangeString] = useState<any[]>([dayjs().format('YYYY-MM-DD'), dayjs().format('YYYY-MM-DD')]);
 
   // This uri is used to send request to process CRUD operation of news
   const newsUri = "/api/getnews/" + userId
@@ -197,6 +197,11 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
 
   // console.log("dateRangeString", dateRangeString)
   const onFinish: FormProps<FieldType>["onFinish"] = async (data) => {
+    if (data['personSharing'] == undefined) {
+      data['personSharing'] = 'thính giả'
+    }
+    console.log('data: ', data)
+    console.log('data[personSharing]: ', data['personSharing'])
     const response = await fetch('/api/addnews/' + userId,{
       method: "POST",
       headers: {'Content-Type': 'application/json'},
@@ -299,6 +304,17 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
 
   const antdTheme = theme.useToken()
   // console.log(dateRangeString)
+
+  let newsToPresent = news
+  if (role == 'ROLE_MC') {
+    const to_remove = ['Nháp', 'Lưu trữ']
+    newsToPresent = newsToPresent.filter((obj : any) => !to_remove.includes(obj['status']));
+  }
+  else if (role == 'ROLE_DATAENTRY' || role == 'ROLE_DATAENTRY_EDITOR' || role == 'ROLE_EDITOR'){
+    const to_remove = ['Lưu trữ']
+    newsToPresent = newsToPresent.filter((obj : any) => !to_remove.includes(obj['status']));
+  }
+
   return (
     <div>
       <div style={{display:'flex', 
@@ -359,7 +375,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
             <DataGrid
               editMode='row'
               getRowId={(obj)=>obj['_id']['$oid']}
-              rows={news}
+              rows={newsToPresent}
               columns={columns}
               initialState={{
                 pagination: {
@@ -434,7 +450,9 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                   <Form.Item<FieldType>
                     label = "Cộng tác viên"
                     name="personSharing"
-                    rules={[{ required: true, message: '' }]}
+                    // rules={[{ required: true, message: '' }]}
+                    
+                    rules={[{ required: false}]}
                     style={{width: '80%', marginRight: 10, marginBottom: 10}}
                     
                   >
