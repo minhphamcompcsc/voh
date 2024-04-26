@@ -744,10 +744,15 @@ def addNews(userId : str):
     if (permission == "none"):
         return "Tài khoản không tồn tại", 404
     
+    startStatus = 'Chờ duyệt'
+
+    if (permission == "thukyBTV"):
+        startStatus = 'Chờ đọc'
+     
     datetime_now = datetime.now()
     _news = request.json
     _news.update({'created_on' : datetime_now})
-    _news.update({'status' : 'Chờ đọc'})
+    _news.update({'status' : startStatus})
     _news.update({'distance' : 100})
 
     if 'phone_number' not in _news:

@@ -4,14 +4,17 @@ import Box from '@mui/material/Box';
 import {Row, Col, Button, Form, Skeleton, Card, type FormProps, Input, AutoComplete, theme, Select, DatePicker } from 'antd';
 import type { SelectProps } from 'antd';
 import { CloseOutlined, UndoOutlined, SearchOutlined } from '@ant-design/icons';
-import { DataGrid, GridColDef, GridCellEditStopParams, GridCellEditStopReasons, } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridCellEditStopParams, GridCellEditStopReasons, GridToolbar , GridToolbarContainer , GridToolbarExport } from '@mui/x-data-grid';
+import { useDemoData } from '@mui/x-data-grid-generator';
 import { Districts } from '../../../assets/data/district';
 import { Co2Sharp } from '@mui/icons-material';
 import moment from 'moment';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import type { Dayjs } from 'dayjs';
+import unidecode from 'unidecode';
 import { io } from "socket.io-client";
+
 import socketIOClient from 'socket.io-client';
 
 interface Bulletin {
@@ -30,16 +33,18 @@ type FieldType = {
   notice: string;
 };
 
+const { TextArea } = Input;
+
 const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
   console.log('Failed:', errorInfo);
 };
 const { RangePicker } = DatePicker;
 // const defaultStartDate = dayjs().subtract(7, 'days'); // Subtract 7 days to the current date
 // const defaultEndDate = dayjs(); // Get current date
-let readOnly = false
+let hideAddingNewsButton = false
 const role = localStorage.getItem('role')
-if (role == 'ROLE_MC') {
-  readOnly = true
+if (role == 'ROLE_MC' || role == 'ROLE_EDITOR') {
+  hideAddingNewsButton = true
 }
 console.log('current date: ', dayjs())
 const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
@@ -200,8 +205,11 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     if (data['personSharing'] == undefined) {
       data['personSharing'] = 'thính giả'
     }
+    if (data['district'] == undefined) {
+      data['district'] = 'Quận khác'
+    }
     console.log('data: ', data)
-    console.log('data[personSharing]: ', data['personSharing'])
+    // console.log('data[personSharing]: ', data['personSharing'])
     const response = await fetch('/api/addnews/' + userId,{
       method: "POST",
       headers: {'Content-Type': 'application/json'},
@@ -217,20 +225,19 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     // ])
   };
 
-  let statusChoice = ['Nháp', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ']
+  let statusChoice = ['Nháp', 'Chờ duyệt', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ']
   if (role == 'ROLE_MC'){
     statusChoice = ['Chờ đọc', 'Đã đọc', 'Không đọc']
   }
-  else if (role == 'ROLE_DATAENTRY' || role == 'ROLE_DATAENTRY_EDITOR' || role == 'ROLE_EDITOR'){
+  else if (role == 'ROLE_DATAENTRY'){
+    statusChoice = ['Nháp', 'Chờ duyệt', 'Lưu trữ']
+  }
+  else if (role == 'ROLE_EDITOR'){
+    statusChoice = ['Chờ duyệt', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ']
+  }
+  else if (role == 'ROLE_DATAENTRY_EDITOR'){
     statusChoice = ['Nháp', 'Chờ đọc', 'Lưu trữ']
   }
-
-  // let tempNews = news
-  // if (role == 'ROLE_MC') {
-  //   const to_remove = ['Nháp', 'Lưu trữ']
-  //   tempNews = tempNews.filter((obj : any) => !to_remove.includes(obj['status']));
-  // }
-  // setNews(tempNews)
 
   const columns: GridColDef<(typeof news)[number]>[] = [
     {
@@ -306,14 +313,19 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
   // console.log(dateRangeString)
 
   let newsToPresent = news
-  if (role == 'ROLE_MC') {
-    const to_remove = ['Nháp', 'Lưu trữ']
-    newsToPresent = newsToPresent.filter((obj : any) => !to_remove.includes(obj['status']));
-  }
-  else if (role == 'ROLE_DATAENTRY' || role == 'ROLE_DATAENTRY_EDITOR' || role == 'ROLE_EDITOR'){
+  // newsToPresent = newsToPresent.filter((obj : any) => statusChoice.includes(obj['status']));
+  if (role != 'ROLE_ADMIN') {
     const to_remove = ['Lưu trữ']
     newsToPresent = newsToPresent.filter((obj : any) => !to_remove.includes(obj['status']));
   }
+  // if (role == 'ROLE_MC') {
+  //   const to_remove = ['Chờ duyệt', 'Nháp', 'Lưu trữ']
+  //   newsToPresent = newsToPresent.filter((obj : any) => !to_remove.includes(obj['status']));
+  // }
+  // else if (role == 'ROLE_DATAENTRY' || role == 'ROLE_DATAENTRY_EDITOR' || role == 'ROLE_EDITOR'){
+  //   const to_remove = ['Lưu trữ']
+  //   newsToPresent = newsToPresent.filter((obj : any) => !to_remove.includes(obj['status']));
+  // }
 
   return (
     <div>
@@ -356,9 +368,9 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
         </div>
 
         {
-          (readOnly)? null : 
+          (hideAddingNewsButton)? null : 
             formOpen? null :
-            <Button onClick={() => {setFormOpen(!formOpen)}} danger = {formOpen? true : false} type = {"primary"}>
+            <Button onClick={() => {setFormOpen(!formOpen)}} type = {"primary"}>
               Thêm tin
             </Button>
           
@@ -408,6 +420,8 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                 // }
                 return row
               }}
+              // loading={loading} 
+              // slots={{ toolbar: GridToolbar }} 
             />
           </Box>
         </Col> : <Skeleton active></Skeleton>
@@ -419,15 +433,15 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
               extra = { <Button  type='text' shape = 'circle' icon = {<CloseOutlined/>} 
                                 onClick={()=>{setFormOpen(false); setSelectedLine(false)
                                               form.setFieldsValue({
-                                                personSharing: '',
-                                                phone_number: '',
-                                                address: '',
-                                                direction: '',
-                                                district: '',
-                                                state: '',
-                                                speed: '',
-                                                reason: '',
-                                                note: ''
+                                                personSharing: undefined,
+                                                phone_number: undefined,
+                                                address: undefined,
+                                                direction: undefined,
+                                                district: undefined,
+                                                state: undefined,
+                                                speed: undefined,
+                                                reason: undefined,
+                                                note: undefined
                                               })}}/>}
               style={{
                 borderColor: antdTheme.token.colorBorder,
@@ -476,7 +490,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                     rules={[{ required: false}]}
                     style={{width: '40%', marginBottom: 10}}
                   >
-                    <Input readOnly = {readOnly} placeholder='Số điện thoại'/>
+                    <Input placeholder='Số điện thoại'/>
                   </Form.Item>
                 </div>
 
@@ -497,8 +511,12 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                       options={address}
                       placeholder="Địa điểm giao thông"
                       filterOption= {(inputValue, option) => {
-                        return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                        // return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                        const normalizedInputValue = unidecode(inputValue || '').toLowerCase();
+                        const normalizedOptionLabel = unidecode(option?.label || '').toLowerCase();
+                        return normalizedOptionLabel.indexOf(normalizedInputValue) !== -1;
                       }}
+                      
                       onSelect={(value, option) =>{
                         // console.log('value onSelect: ', value)
                         // console.log('option: ', option)
@@ -508,7 +526,15 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                           district: option.district,
                         })
                       }}
-                    />
+                    >
+                      <TextArea
+                        autoSize = {{
+                          minRows: 1,
+                          maxRows: 3
+                        }}
+                      />
+                    </AutoComplete>
+
                 </Form.Item>
 
                 <div style={{display: 'flex', flexDirection: 'row', width: '100%'}}>
@@ -518,25 +544,28 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                       rules={[{ required: false}]}
                       style={{width: '80%', marginRight: '10px', marginBottom: 10}}
                     >
-                      {/* <Input.TextArea 
-                        autoSize = {{
-                          minRows: 1,
-                          maxRows: 3
-                        }}
-                        readOnly = {readOnly}
-                        placeholder='Hướng xe đi'/> */}
                     <AutoComplete
                       options={address}
                       placeholder="Hướng xe đi"
                       filterOption= {(inputValue, option) => {
-                        return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                        // return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                        const normalizedInputValue = unidecode(inputValue || '').toLowerCase();
+                        const normalizedOptionLabel = unidecode(option?.label || '').toLowerCase();
+                        return normalizedOptionLabel.indexOf(normalizedInputValue) !== -1;
                       }}
                       onSelect={(value, option) =>{
                         form.setFieldsValue({
                           direction: option.name,
                         })
                       }}
-                    />
+                    >
+                      <TextArea
+                        autoSize = {{
+                          minRows: 1,
+                          maxRows: 3
+                        }}
+                      />
+                    </AutoComplete>
                   </Form.Item>
 
                   <Form.Item<FieldType>
@@ -545,18 +574,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                     rules={[{ required: false}]}
                     style={{width: '40%', marginBottom: 10}}
                   >
-                    {/* <Input placeholder='Quận'/> */}
-                    {/* <AutoComplete
-                      options={Districts}
-                      placeholder="Quận"
-                      filterOption={(inputValue, option) =>{
-                        console.log('inputValue', inputValue)
-                        console.log('option', option)
-                        return option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-                      }}
-                      disabled = {readOnly}
-                    /> */}
-                    <Select
+                    {/* <Select
                       showSearch
                       placeholder="Quận"
                       // onChange={onChange}
@@ -564,6 +582,17 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                       filterOption={(inputValue, option) => {
                         return option!.value?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
                       }}
+                      options={Districts}
+                    /> */}
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      style={{ width: '100%' }}
+                      placeholder="Quận"
+                      onChange={(value: string[]) => {
+                        console.log(`selected ${value}`);
+                      }
+                    }
                       options={Districts}
                     />
                   </Form.Item>
@@ -594,8 +623,12 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                       placeholder="Tình trạng giao thông"
                       // onChange={onChange}
                       // onSearch={onSearch}
-                      filterOption={(inputValue, option) => {
-                        return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+
+                      filterOption= {(inputValue, option) => {
+                        // return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                        const normalizedInputValue = unidecode(inputValue || '').toLowerCase();
+                        const normalizedOptionLabel = unidecode(option?.label || '').toLowerCase();
+                        return normalizedOptionLabel.indexOf(normalizedInputValue) !== -1;
                       }}
                       options={speeds}
                       onSelect={(value, option) =>{
@@ -635,14 +668,24 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                       options={reasons}
                       placeholder="Nguyên nhân sự việc"
                       filterOption= {(inputValue, option) => {
-                        return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                        // return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                        const normalizedInputValue = unidecode(inputValue || '').toLowerCase();
+                        const normalizedOptionLabel = unidecode(option?.label || '').toLowerCase();
+                        return normalizedOptionLabel.indexOf(normalizedInputValue) !== -1;
                       }}
                       onSelect={(value, option) =>{
                         form.setFieldsValue({
                           reason: option.label,
                         })
                       }}
-                    />
+                    >
+                      <TextArea
+                        autoSize = {{
+                          minRows: 1,
+                          maxRows: 3
+                        }}
+                      />
+                    </AutoComplete>
                 </Form.Item>
 
                 <Form.Item<FieldType>
@@ -667,15 +710,15 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                               onClick={()=>{
                                 setSelectedLine(false)
                                 form.setFieldsValue({
-                                  personSharing: '',
-                                  phone_number: '',
-                                  address: '',
-                                  direction: '',
-                                  district: '',
-                                  state: '',
-                                  speed: '',
-                                  reason: '',
-                                  note: ''
+                                  personSharing: undefined,
+                                  phone_number: undefined,
+                                  address: undefined,
+                                  direction: undefined,
+                                  district: undefined,
+                                  state: undefined,
+                                  speed: undefined,
+                                  reason: undefined,
+                                  note: undefined
                                 })
                               }}
                       >
