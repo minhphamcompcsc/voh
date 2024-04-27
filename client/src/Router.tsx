@@ -31,7 +31,7 @@ const Router = () => {
             <Route path='/chatGPT' element={<ProtectedRoute element={<Home />} />}/>
             <Route path='/bantin' element={<ProtectedRoute element={<Home />} />}/>  
             <Route path='/thongke' element={<ProtectedRoute element={<Home />} />}/>  
-            <Route path='/taikhoan' element={<ProtectedRoute element={<Home />} />}/>  
+            <Route path='/dulieuadmin' element={<ProtectedRoute element={<Home />} />}/>  
             <Route path='/hinhanh' element={<ProtectedRoute element={<Home />} />}/>
             <Route path='/nguyennhan' element={<ProtectedRoute element={<Home />} />}/> 
             <Route path='/demoVideo' element={<ProtectedRoute element={<Home />} />}/> 

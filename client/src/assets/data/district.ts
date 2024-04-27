@@ -19,10 +19,10 @@ export const Districts = [
 	{value: 'Phú Nhuận'},
 	{value: 'Tân Bình'},
 	{value: 'Tân Phú'}, 
-	{value: 'Huyện Bình Chánh'}, 
-	{value: 'Huyện Cần Giờ'},
-	{value: 'Huyện Củ Chi'}, 
-	{value: 'Huyện Hóc Môn'},
-	{value: 'Huyện Nhà Bè'},
+	{value: 'Bình Chánh'}, 
+	{value: 'Cần Giờ'},
+	{value: 'Củ Chi'}, 
+	{value: 'Hóc Môn'},
+	{value: 'Nhà Bè'},
 	{value: 'Quận khác'} 
 ]
