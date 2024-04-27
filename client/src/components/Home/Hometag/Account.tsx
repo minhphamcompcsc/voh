@@ -2,7 +2,7 @@ import React from 'react';
 import {useState, useEffect} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import Box from '@mui/material/Box';
-import { DataGrid, GridColDef , GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef , GridRowSelectionModel, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import { Button, Modal, Form, Checkbox, Input , Select, type SelectProps, Row, Col , Tabs, type FormProps, AutoComplete} from 'antd';
 import {UserAddOutlined, UserDeleteOutlined, UndoOutlined, ExclamationOutlined , GoldOutlined , AppstoreAddOutlined} from '@ant-design/icons'
 import { Roles } from '../../../assets/data/role';
@@ -15,6 +15,14 @@ interface Account {
 }
 
 const { TextArea } = Input;
+
+function CustomToolbar() {
+  return (
+    <GridToolbarContainer>
+      <GridToolbarExport />
+    </GridToolbarContainer>
+  );
+}
 
 type AccountFormFieldType = {
   name: string;
@@ -701,6 +709,9 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
             disableRowSelectionOnClick
             onRowSelectionModelChange={(newRowSelectionModel) => {
               setRowSelectionModel(newRowSelectionModel);
+            }}
+            slots={{
+              toolbar: CustomToolbar,
             }}
           />
         </Box>

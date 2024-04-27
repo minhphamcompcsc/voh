@@ -268,8 +268,12 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
 
   let newsToPresent = news
   // newsToPresent = newsToPresent.filter((obj : any) => statusChoice.includes(obj['status']));
-  if (role != 'ROLE_ADMIN') {
+  if (role != 'ROLE_ADMIN' && newsToPresent[0] != null && newsToPresent.length > 1) {
     const to_remove = ['Lưu trữ']
+    newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
+  }
+  if (role == 'ROLE_MC' && newsToPresent[0] != null && newsToPresent.length > 1) {
+    const to_remove = ['Nháp', 'Chờ duyệt']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }
 
@@ -352,7 +356,6 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                 getRowId={(obj) => obj['_id']['$oid']}
                 rows={newsToPresent[0] != null ? newsToPresent : []}
                 columns={columns}
-
                 initialState={{
                   pagination: {
                     paginationModel: {
