@@ -1031,6 +1031,9 @@ def internaladdAddress(address: str, direction: str, district):
             'district': district,
             'created_on' : datetime_now
         }
+        if (_address['direction'] == ''):
+            del _address['direction']
+
         _address_ = addresses.insert_one(_address)
         return {'$ref': "address", '$id': _address_.inserted_id}
 
