@@ -104,7 +104,7 @@ const Home: React.FC = () => {
       title = ' ';
     } else if (currentContent === '/thongke') {
       title = ' ';
-    } else if (currentContent === '/taikhoan') {
+    } else if (currentContent === '/dulieuadmin') {
       title = ' ';
     } else if (currentContent === '/nguyennhan') {
       title = ' ';
@@ -234,7 +234,7 @@ const Home: React.FC = () => {
                 {currentContent === '/chatGPT' && <ChatGPT themeClassName={themeClassName}/>}
                 {currentContent === '/bantin' && <Bulletin themeClassName={themeClassName}/>}
                 {currentContent === '/thongke' && <StructureFile/>}
-                {currentContent === '/taikhoan' && <Account themeClassName={themeClassName}/>}
+                {currentContent === '/dulieuadmin' && <Account themeClassName={themeClassName}/>}
                 {currentContent === '/nguyennhan' && <Reason themeClassName={themeClassName}/>}
                 {currentContent === '/hinhanh' && <ImageGen themeClassName={themeClassName}/>} 
               </Layout.Content>

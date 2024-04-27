@@ -47,8 +47,8 @@ const MenuList: React.FC<MenuListProps> = ({ darkTheme, onClick, collapsed }) =>
 
     {
         role == 'ROLE_ADMIN'?
-        <Menu.Item key="/taikhoan" style={itemStyle} icon={<TeamOutlined />}>
-            {collapsed ? 'Tài khoản' : 'Tài khoản'}
+        <Menu.Item key="/dulieuadmin" style={itemStyle} icon={<TeamOutlined />}>
+            {collapsed ? 'Dữ liệu admin' : 'Dữ liệu admin'}
         </Menu.Item> : null
         // <div>
         

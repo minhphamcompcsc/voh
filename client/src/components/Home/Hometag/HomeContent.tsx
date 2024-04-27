@@ -93,20 +93,11 @@ const HomeContent: React.FC<ChatGPTProps> = ({ themeClassName }) => {
           role == 'ROLE_ADMIN'?
           <div style = {{display: 'flex', flexDirection: 'column'}}>
             <div style={{ fontSize: sizeChar.sizeHeader, textAlign: 'center'}}>- Dữ liệu admin -</div>
-            <Button type={buttonType} block size={'large'} onClick={handleButtonClick} data-key="/taikhoan" style={{width:sizeChar.sizeButton, margin: 8}}> 
+            <Button type={buttonType} block size={'large'} onClick={handleButtonClick} data-key="/dulieuadmin" style={{width:sizeChar.sizeButton, margin: 8}}> 
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <TeamOutlined style={{ marginRight: sizeChar.sizeMargin, transform: `scale(${sizeChar.sizeImage})` }} />
                 <div>  
-                  <div style={{ fontSize: sizeChar.sizeHeader }}>Tài khoản</div>
-                </div>   
-              </div>
-            </Button>
-
-            <Button type={buttonType} block size={'large'} onClick={handleButtonClick} data-key="/nguyennhan" style={{width:sizeChar.sizeButton, margin: 8}}> 
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <FolderViewOutlined style={{ marginRight: sizeChar.sizeMargin, transform: `scale(${sizeChar.sizeImage})` }} />
-                <div>  
-                  <div style={{ fontSize: sizeChar.sizeHeader }}>Nguyên nhân giao thông</div>
+                  <div style={{ fontSize: sizeChar.sizeHeader }}>Dữ liệu admin</div>
                 </div>   
               </div>
             </Button>

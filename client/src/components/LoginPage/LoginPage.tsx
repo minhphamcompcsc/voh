@@ -17,13 +17,12 @@ const LoginPage = () => {
   const { register, handleSubmit, formState: { errors }, } = useForm<LoginFormValue>()
   const login: SubmitHandler<LoginFormValue> = async (data : any) => {
     // Send an authentication request to the flask server
-    const uri = "/api/authenticate/" + data.username + "/" + data.password
-    const response = await fetch(uri, {
+    console.log('data: ', data)
+    const response = await fetch('/api/authenticate',{
       method: "POST",
-      headers: {'Content-Type': 'application/json'}
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
     })
-
-    // console.log("acc:", acc)
     if(response.ok) {
       // Succeed
       // alert("Đăng nhập thành công!!!")
