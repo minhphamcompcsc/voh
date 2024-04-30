@@ -348,7 +348,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                   "& .MuiDataGrid-columnHeader": {
                     whiteSpace: "normal",
                     lineHeight: "normal",
-                    backgroundColor: '#F0EBE3'
+                    backgroundColor: '#f6f7fa'
                   },
                 }}
                 getRowHeight={() => 'auto'}
@@ -412,7 +412,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                   backgroundColor: '#f6f7fa',
                 }}
                 bodyStyle={{ padding: 16 }}
-                headStyle={{ textAlign: 'center' }}
+                headStyle={{ textAlign: 'center'}}
               >
                 <Form form={form}
                   name="inputNews"
@@ -439,7 +439,10 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                         options={ctv}
                         placeholder="Tên cộng tác viên"
                         filterOption={(inputValue, option) => {
-                          return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
+                          const normalizedInputValue = unidecode(inputValue || '').toLowerCase();
+                          const normalizedOptionLabel = unidecode(option?.label || '').toLowerCase();
+                          return normalizedOptionLabel.indexOf(normalizedInputValue) !== -1;
+                          // return option!.label?.toLowerCase().indexOf(inputValue?.toLowerCase()) !== -1
                         }}
                         onSelect={(value, option) => {
                           form.setFieldsValue({

@@ -8,6 +8,7 @@ import {UserAddOutlined, UserDeleteOutlined, UndoOutlined, ExclamationOutlined ,
 import { Roles } from '../../../assets/data/role';
 import type { TabsProps } from 'antd';
 import { Districts } from '../../../assets/data/district';
+
 import unidecode from 'unidecode';
 
 interface Account {
@@ -129,7 +130,7 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
   };
   
   const addCTV: FormProps<CTVFormFieldType>["onFinish"] = async (data) => {
-    if (ctv.some((obj) => { return obj.name == data['name'] && obj.phone_number == data['phone_number']})){
+    if (ctv.some((item) => unidecode(item.name || '').toLowerCase() === unidecode(data.name || '').toLowerCase() && item.phone_number === data.phone_number)){
       alert("Cộng tác viên đã tồn tại")
     }
     else{
@@ -153,7 +154,9 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
   };
 
   const addAddress: FormProps<AddressFormFieldType>["onFinish"] = async (data) => {
-    if (ctv.some((obj) => { return obj.name == data['name'] && obj.direction == data['direction'] && obj.district == data['district']})){
+    if (address.some((item) => 
+      unidecode(item.name || '').toLowerCase() === unidecode(data.name || '').toLowerCase() && 
+      unidecode(item.direction || '').toLowerCase() === unidecode(data.direction || '').toLowerCase())){
       alert("Địa điểm đã có trong dữ liệu")
     }
     else{
@@ -183,7 +186,7 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
   };
 
   const addReason: FormProps<ReasonFormFieldType>["onFinish"] = async (data) => {
-    if (reasons.some(obj => obj.label === data['name'])){
+    if (reasons.some(item => unidecode(item.name || '').toLowerCase() === unidecode(data.name || '').toLowerCase())){
       alert("Lý do đã có trong dữ liệu")
     }
     else{
@@ -217,11 +220,13 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
       field: 'name',
       headerName: 'Tên',
       flex: 2,
+      editable: true,
     },
     {
       field: 'phone_number',
       headerName: 'Số điện thoại',
       flex: 2,
+      editable: true,
     },
     {
       field: 'username',
@@ -232,6 +237,9 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
       field: 'role',
       headerName: 'Vai trò',
       flex: 2,
+      type: 'singleSelect',
+      valueOptions: ['MC', 'Thư ký', 'Thư ký kiêm biên tập viên', 'Biên tập viên', 'Admin'],
+      editable: true,
     },
     {
       field: 'created_on',
@@ -245,11 +253,13 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
       field: 'name',
       headerName: 'Tên',
       flex: 2,
+      editable: true,
     },
     {
       field: 'phone_number',
       headerName: 'Số điện thoại',
       flex: 2,
+      editable: true,
     },
     {
       field: 'created_on',
@@ -258,7 +268,7 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
     },
   ];
 
-  const columnsAddress: GridColDef<(typeof ctv)[number]>[] = [
+  const columnsAddress: GridColDef<(typeof address)[number]>[] = [
     {
       field: 'name',
       headerName: 'Địa điểm',
@@ -270,7 +280,7 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
       flex: 3,
     },
     {
-      field: 'districtString',
+      field: 'district',
       headerName: 'Quận',
       flex: 2,
     },
@@ -281,11 +291,12 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
     },
   ];
 
-  const columnsReason: GridColDef<(typeof ctv)[number]>[] = [
+  const columnsReason: GridColDef<(typeof reasons)[number]>[] = [
     {
       field: 'label',
       headerName: 'Nguyên nhân',
       flex: 8,
+      editable: true,
     },
     {
       field: 'created_on',
@@ -654,7 +665,7 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
         <Box sx={{ height: '575px', width: '100%' }}>
           <Tabs
             onChange={(key: string) => {
-              console.log(key);
+              // console.log(key);
               setTypeDataToPresent(key)
               if (key == 'accounts') {
                 setDataToPresent(accounts)
@@ -693,7 +704,8 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
                 backgroundColor: '#F0EBE3'
               },
             }}
-            // getRowHeight={() => 'auto'}
+            editMode='row'
+            getRowHeight={() => 'auto'}
             getRowId={(obj)=>obj['_id']['$oid']}
             rows={_dateToPresent}
             columns={columns}
@@ -709,6 +721,73 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
             disableRowSelectionOnClick
             onRowSelectionModelChange={(newRowSelectionModel) => {
               setRowSelectionModel(newRowSelectionModel);
+            }}
+            processRowUpdate={async (row) => {
+              if (typeDataToPresent == 'accounts'){
+                const response = await fetch('/api/updateaccount/' + userId, {
+                  method: "POST",
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(row)
+                })
+                if (response.ok){
+                  const updatedAccounts = accounts.map(obj => {
+                    if (obj['_id']['$oid'] == row['_id']['$oid']) {
+                      return row;
+                    } else {
+                      return obj;
+                    }
+                  });
+                  setAccounts(updatedAccounts)
+                  // alert('Cập nhập tài khoản thành công')
+                }
+                else {
+                  alert('Cập nhập tài khoản không thành công')
+                }
+              }
+              else if (typeDataToPresent == 'ctv') {
+                const response = await fetch('/api/updatectv/' + userId, {
+                  method: "POST",
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(row)
+                })
+                if (response.ok){
+                  const updatedCTV = ctv.map(obj => {
+                    if (obj['_id']['$oid'] == row['_id']['$oid']) {
+                      return row;
+                    } else {
+                      return obj;
+                    }
+                  });
+                  setCTV(updatedCTV)
+                  // alert('Cập nhập thông tin cộng tác viên thành công')
+                }
+                else {
+                  alert('Cập nhập thông tin cộng tác viên không thành công')
+                }
+              }
+              else if (typeDataToPresent == 'reasons') {
+                const response = await fetch('/api/updatereason/' + userId, {
+                  method: "POST",
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(row)
+                })
+                if (response.ok){
+                  const updatedReasons = reasons.map(obj => {
+                    if (obj['_id']['$oid'] == row['_id']['$oid']) {
+                      return row;
+                    } else {
+                      return obj;
+                    }
+                  });
+                  setReasons(updatedReasons)
+                  // alert('Cập nhập nguyên nhân thành công')
+                }
+                else {
+                  alert('Cập nhập nguyên nhân không thành công')
+                }
+              }
+              console.log('row: ', row)
+              return row
             }}
             slots={{
               toolbar: CustomToolbar,
