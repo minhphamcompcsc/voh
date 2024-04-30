@@ -239,6 +239,40 @@ def addAccount(userId : str):
     
     return jsonData
 
+@app.route('/api/updateaccount/<userId>', methods=['POST'])
+def updateAccount(userId : str):
+    permission = getPermission(userId)
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
+    
+    _account = request.json
+    if _account['role'] == 'MC':
+        _account.update({'role' : 'ROLE_MC'})
+    elif _account['role'] == 'Admin':
+        _account.update({'role' : 'ROLE_ADMIN'})
+    elif _account['role'] == 'Thư ký':
+        _account.update({'role' : 'ROLE_DATAENTRY'})
+    elif _account['role'] == 'Thư ký kiêm biên tập viên':
+        _account.update({'role' : 'ROLE_DATAENTRY_EDITOR'})
+    elif _account['role'] == 'Biên tập viên':
+        _account.update({'role' : 'ROLE_EDITOR'})
+
+    accountId = _account['_id']['$oid']
+
+    accounts.update_one(
+        {
+            "_id" : ObjectId(accountId)
+        },
+        {
+            "$set": {
+                "name" : _account['name'],
+                "phone_number" : _account['phone_number'],
+                "role":  _account['role'],
+            }
+        }
+    )
+    return "Update account thành công", 200
+
 @app.route('/api/admin/accounts/<userId>', methods=['GET'])
 def getAccounts(userId : str):
     permission = getPermission(userId)
@@ -1191,6 +1225,51 @@ def updateNews(userId : str):
     socketio.emit('update_news', json_obj)
 
     return "Tin đã được cập nhật!!!", 200
+
+@app.route('/api/updatectv/<userId>', methods=['POST'])
+def updateCTV(userId : str):
+    permission = getPermission(userId)
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
+    
+    _ctv = request.json
+
+    ctvId = _ctv['_id']['$oid']
+
+    sharers.update_one(
+        {
+            "_id" : ObjectId(ctvId)
+        },
+        {
+            "$set": {
+                "name" : _ctv['name'],
+                "phone_number" : _ctv['phone_number'],
+            }
+        }
+    )
+    return "Update ctv thành công", 200
+
+@app.route('/api/updatereason/<userId>', methods=['POST'])
+def updateReason(userId : str):
+    permission = getPermission(userId)
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
+    
+    _reason = request.json
+
+    reasonId = _reason['_id']['$oid']
+
+    reasons.update_one(
+        {
+            "_id" : ObjectId(reasonId)
+        },
+        {
+            "$set": {
+                "name" : _reason['label'],
+            }
+        }
+    )
+    return "Update lý do thành công", 200
 
 if __name__ == "__main__":
     # app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
