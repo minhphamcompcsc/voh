@@ -2,7 +2,7 @@ import React from 'react';
 import {useState, useEffect} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import Box from '@mui/material/Box';
-import { DataGrid, GridColDef , GridRowSelectionModel, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid, GridColDef , GridRowSelectionModel, GridToolbarContainer, GridToolbarExport, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Modal, Form, Checkbox, Input , Select, type SelectProps, Row, Col , Tabs, type FormProps, AutoComplete} from 'antd';
 import {UserAddOutlined, UserDeleteOutlined, UndoOutlined, ExclamationOutlined , GoldOutlined , AppstoreAddOutlined} from '@ant-design/icons'
 import { Roles } from '../../../assets/data/role';
@@ -273,16 +273,55 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
       field: 'name',
       headerName: 'Địa điểm',
       flex: 6,
+      editable: true,
     },
     {
       field: 'direction',
       headerName: 'Hướng đi',
       flex: 3,
+      editable: true,
     },
     {
       field: 'district',
       headerName: 'Quận',
       flex: 2,
+      renderCell: (params: GridRenderCellParams<any>) => {
+        return  <Select
+                  mode="multiple"
+                  variant="borderless"
+                  allowClear
+                  style={{ width: '100%' }}
+                  placeholder="Vd: Quận 1, Quận 3, Quận Tân Bình"
+                  onChange={async (value: string[]) => {
+                    params.row.district = value
+                    if(params.row.district == '') {
+                      params.row.district = ['Quận Khác']
+                    }
+                    const response = await fetch('/api/updateaddress/' + userId, {
+                      method: "POST",
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(params.row)
+                    })
+                    if (response.ok){
+                      const updatedAddress = address.map(obj => {
+                        if (obj['_id']['$oid'] == params.row['_id']['$oid']) {
+                          return params.row;
+                        } else {
+                          return obj;
+                        }
+                      });
+                      setAddress(updatedAddress)
+                    }
+                    else {
+                      alert('Cập nhập địa điểm không thành công')
+                    }
+                  }}
+                  defaultValue={params.row.district}
+                  options={Districts}
+                >
+                  <Input/>
+                </Select>
+      }
     },
     {
       field: 'created_on',
@@ -784,6 +823,26 @@ const Account: React.FC<Account> = ({ themeClassName }) => {
                 }
                 else {
                   alert('Cập nhập nguyên nhân không thành công')
+                }
+              }
+              else if (typeDataToPresent == 'address') {
+                const response = await fetch('/api/updateaddress/' + userId, {
+                  method: "POST",
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(row)
+                })
+                if (response.ok){
+                  const updatedAddress = address.map(obj => {
+                    if (obj['_id']['$oid'] == row['_id']['$oid']) {
+                      return row;
+                    } else {
+                      return obj;
+                    }
+                  });
+                  setAccounts(updatedAddress)
+                }
+                else {
+                  alert('Cập nhập địa điểm không thành công')
                 }
               }
               console.log('row: ', row)
