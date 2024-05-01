@@ -563,10 +563,10 @@ def getNews(userId : str):
         {
             '$project': {
                 '_id': 1,
-                'ctv': {'$concat': [{"$ifNull": [ '$person_sharing_info.name', ""]}, ' ', { "$ifNull": [ '$person_sharing_info.phone_number', "" ] }]},
-                # 'ctv': '$person_sharing_info.name',
-                # 'ctv_phone': '$person_sharing_info.phone_number',
-                'location': {
+                'concatctv': {'$concat': [{"$ifNull": [ '$person_sharing_info.name', ""]}, ' ', { "$ifNull": [ '$person_sharing_info.phone_number', "" ] }]},
+                'ctv': '$person_sharing_info.name',
+                'ctv_phone': '$person_sharing_info.phone_number',
+                'concatlocation': {
                     '$concat': [
                         {'$ifNull': ['$address_info.name', '']}, 
                         {'$ifNull': [{'$concat': [' tới ', '$address_info.direction']}, '']},
@@ -584,9 +584,9 @@ def getNews(userId : str):
                         ]},
                     ]
                 },
-                # 'location': '$address_info.name',
-                # 'district': '$address_info.district',
-                'district': {'$cond': {
+                'location': '$address_info.name',
+                'district': '$address_info.district',
+                'concatdistrict': {'$cond': {
                                 'if': {'$isArray': '$address_info.district'},
                                 'then': {'$reduce': {
                                     'input': '$address_info.district',
@@ -595,7 +595,7 @@ def getNews(userId : str):
                                 }},
                                 'else': {'$toString': '$address_info.district'}
                             }},
-                # 'direction': '$address_info.direction',
+                'direction': '$address_info.direction',
                 'state': {
                     '$concat': [
                         {'$ifNull': ['$speed_info.name', '']}, 
@@ -673,96 +673,17 @@ def addNews(userId : str):
     _news.update({'status' : startStatus})
     _news.update({'distance' : 100})
 
-    # if 'phone_number' not in _news:
-    #     _news.update({'phone_number': ''})
-    # if 'direction' not in _news:
-    #     _news.update({'direction': ''})
-    # if 'district' not in _news:
-    #     _news.update({'district': ''})
-    # if 'reason' not in _news:
-    #     _news.update({'reason': ''})
-    # if 'notice' not in _news:
-    #     _news.update({'notice': ''})
-
     _news['personSharing'] =  internaladdCTV(_news['personSharing'], _news['phone_number'])
-    
-    # sharer = sharers.find_one({'name': _news['personSharing'], 'phone_number': _news['phone_number']})
-    # if not sharer:
-    #     sharer = {
-    #         'name': _news['personSharing'],
-    #         'created_on' : datetime_now
-    #     }
-    #     if _news['phone_number'] != '':
-    #         sharer.update({'phone_number' : _news['phone_number']})
-
-    #     sharer = sharers.insert_one(sharer)
-    #     _news['personSharing'] = {
-    #         '$ref': "person_sharing",
-    #         '$id': sharer.inserted_id
-    #     }
-    # else:
-    # _news['personSharing'] = {
-    #     '$ref': "person_sharing",
-    #     '$id': ObjectId(sharer['_id'])
-    # }
-
-    # address = addresses.find_one({'name': _news['address']})
-    # createNewAddress = True if not address else False
-    # if address and 'district' not in address and _news['district'] != '':
-    #     createNewAddress = True
-    # if address and 'district' in address and _news['district'] != address['district']:
-    #     createNewAddress = True
-    # if address and 'direction' not in address and _news['direction'] != '':
-    #     createNewAddress = True
-    # if address and 'direction' in address and _news['direction'] != address['direction']:
-    #     createNewAddress = True
-
-    # if createNewAddress:
-    #     address = {
-    #         'name': _news['address'],
-    #         'created_on' : datetime_now
-    #     }
-    #     if _news['district'] != '':
-    #         address.update({'district' : _news['district']})
-    #     if _news['direction'] != '':
-    #         address.update({'direction' : _news['direction']})
-        
-    #     address = addresses.insert_one(address)
-    #     _news['address'] = {
-    #         '$ref': "address",
-    #         '$id': address.inserted_id
-    #     }
-    # else:
-    #     _news['address'] = {
-    #         '$ref': "address",
-    #         '$id': ObjectId(address['_id'])
-    #     }
 
     _news['address'] = internaladdAddress(_news['address'], _news['direction'], _news['district'])
     
+    _news['reason'] = internaladdReason(_news['reason'])
+
     speed = traffic_state.find_one({'name': _news['state']})
     _news['speed'] = {
         '$ref': "speed",
         '$id': ObjectId(speed['_id'])
     }
-
-    reason = reasons.find_one({'name': _news['reason']}) if _news['reason'] != '' else reasons.find_one({'name': 'Chưa rõ nguyên nhân'})
-    if not reason:
-        reason = {
-            'name': _news['reason'],
-            'created_on' : datetime_now
-        }
-        
-        reason = reasons.insert_one(reason)
-        _news['reason'] = {
-            '$ref': "reason",
-            '$id': reason.inserted_id
-        }
-    else:
-        _news['reason'] = {
-            '$ref': "reason",
-            '$id': ObjectId(reason['_id'])
-        }
 
     del _news['phone_number']
     del _news['district']
@@ -773,7 +694,7 @@ def addNews(userId : str):
     pipeline = [
         {
             '$match': {
-                '_id': newsId
+                '_id': ObjectId(newsId)
             }
         },
         {
@@ -823,10 +744,10 @@ def addNews(userId : str):
         {
             '$project': {
                 '_id': 1,
-                'ctv': {'$concat': [{"$ifNull": [ '$person_sharing_info.name', ""]}, ' ', { "$ifNull": [ '$person_sharing_info.phone_number', "" ] }]},
-                # 'ctv': '$person_sharing_info.name',
-                # 'ctv_phone': '$person_sharing_info.phone_number',
-                'location': {
+                'concatctv': {'$concat': [{"$ifNull": [ '$person_sharing_info.name', ""]}, ' ', { "$ifNull": [ '$person_sharing_info.phone_number', "" ] }]},
+                'ctv': '$person_sharing_info.name',
+                'ctv_phone': '$person_sharing_info.phone_number',
+                'concatlocation': {
                     '$concat': [
                         {'$ifNull': ['$address_info.name', '']}, 
                         {'$ifNull': [{'$concat': [' tới ', '$address_info.direction']}, '']},
@@ -844,9 +765,18 @@ def addNews(userId : str):
                         ]},
                     ]
                 },
-                # 'location': '$address_info.name',
-                # 'district': '$address_info.district',
-                # 'direction': '$address_info.direction',
+                'location': '$address_info.name',
+                'district': '$address_info.district',
+                'concatdistrict': {'$cond': {
+                                'if': {'$isArray': '$address_info.district'},
+                                'then': {'$reduce': {
+                                    'input': '$address_info.district',
+                                    'initialValue': '',
+                                    'in': {'$concat': ['$$value', ' ', {'$toString': '$$this'}]}
+                                }},
+                                'else': {'$toString': '$address_info.district'}
+                            }},
+                'direction': '$address_info.direction',
                 'state': {
                     '$concat': [
                         {'$ifNull': ['$speed_info.name', '']}, 
@@ -859,17 +789,24 @@ def addNews(userId : str):
                 'distance': 1,
                 'notice': 1,
                 'status': 1,
+                # 'created_on': {
+                #     '$cond': {
+                #         'if': {'$eq': [{'$type': '$created_on'}, 'date']},
+                #         'then': {
+                #             '$dateToString': {
+                #                 'date': '$created_on',
+                #                 # 'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
+                #                 'format': '%Y-%m-%d'  # Adjust the format as needed
+                #             }
+                #         },
+                #         'else': '$created_on'
+                #     }
+                # }
                 'created_on': {
                     '$cond': {
                         'if': {'$eq': [{'$type': '$created_on'}, 'date']},
-                        'then': {
-                            '$dateToString': {
-                                'date': '$created_on',
-                                # 'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
-                                'format': '%Y-%m-%d'  # Adjust the format as needed
-                            }
-                        },
-                        'else': '$created_on'
+                        'then': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d'}},
+                        'else': {'$substr': ['$created_on', 0, 10]}
                     }
                 }
             }
@@ -1055,9 +992,10 @@ def internaladdCTV(name : str, phone_number: str):
     return {'$ref': "person_sharing", '$id': ObjectId(sharer['_id'])}
 
 def internaladdAddress(address: str, direction: str, district):
-    _address = addresses.find_one({'name': address, 'direction': direction, 'district': district})
+    _address = addresses.find_one({'name': address, 'direction': direction, 'district': {'$all': district}})
 
     if not _address:
+        # print ('cannot find address and create')
         datetime_now = datetime.now()
         _address = {
             'name': address, 
@@ -1096,6 +1034,55 @@ def updateNews(userId : str):
         return "Tài khoản không tồn tại", 404
     
     _news = request.json
+    # print(_news)
+
+    if 'ctv_phone' not in _news:
+        _news.update({'ctv_phone': 'thính giả'})
+    if 'direction' not in _news:
+        _news.update({'direction': ''})
+    if 'district' not in _news:
+        _news.update({'district': ['Quận khác']})
+    if 'reason' not in _news:
+        _news.update({'reason': 'Chưa rõ nguyên nhân'})
+    if 'notice' not in _news:
+        _news.update({'notice': ''})
+
+    _news.update(
+        {'personSharing' :  internaladdCTV(_news['ctv'], _news['ctv_phone'])}
+    )
+    _news.update(
+        {'address' : internaladdAddress(_news['location'], _news['direction'], _news['district'])}
+    )
+    _news.update(
+        {'reason' : internaladdReason(_news['reason'])}
+    )
+
+    if _news['state'] == 'Thông thoáng 40 km/h':
+        _news.update({'state' : 'Thông thoáng'})
+    elif _news['state'] == 'Xe đông di chuyển ổn định 35 km/h':
+        _news.update({'state' : 'Xe đông di chuyển ổn định'})
+    elif _news['state'] == 'Xe đông di chuyển khó khăn 15 km/h':
+        _news.update({'state' : 'Xe đông di chuyển khó khăn'})
+    elif _news['state'] == 'Xe đông di chuyển chậm 25 km/h':
+        _news.update({'state' : 'Xe đông di chuyển chậm'})
+    elif _news['state'] == 'Ùn tắc 5 km/h':
+        _news.update({'state' : 'Ùn tắc'})
+
+    speed = traffic_state.find_one({'name': _news['state']})
+    _news.update({'speed' : {
+        '$ref': "speed",
+        '$id': ObjectId(speed['_id'])
+    }})
+
+    del _news['concatctv']
+    del _news['concatlocation']
+    del _news['ctv']
+    del _news['ctv_phone']
+    del _news['direction']
+    del _news['district']
+    del _news['location']
+    del _news['state']
+
     newsId = _news['_id']['$oid']
     news.update_one(
         {
@@ -1103,6 +1090,10 @@ def updateNews(userId : str):
         },
         {
             "$set": {
+                "personSharing": _news['personSharing'],
+                "address" : _news['address'],
+                "reason" : _news['reason'],
+                "speed" : _news['speed'],
                 "status" : _news['status'],
                 "notice" : _news['notice']
             }
@@ -1112,7 +1103,7 @@ def updateNews(userId : str):
     pipeline = [
         {
             '$match': {
-                "_id" : ObjectId(newsId)
+                '_id': ObjectId(newsId)
             }
         },
         {
@@ -1162,10 +1153,10 @@ def updateNews(userId : str):
         {
             '$project': {
                 '_id': 1,
-                'ctv': {'$concat': [{"$ifNull": [ '$person_sharing_info.name', ""]}, ' ', { "$ifNull": [ '$person_sharing_info.phone_number', "" ] }]},
-                # 'ctv': '$person_sharing_info.name',
-                # 'ctv_phone': '$person_sharing_info.phone_number',
-                'location': {
+                'concatctv': {'$concat': [{"$ifNull": [ '$person_sharing_info.name', ""]}, ' ', { "$ifNull": [ '$person_sharing_info.phone_number', "" ] }]},
+                'ctv': '$person_sharing_info.name',
+                'ctv_phone': '$person_sharing_info.phone_number',
+                'concatlocation': {
                     '$concat': [
                         {'$ifNull': ['$address_info.name', '']}, 
                         {'$ifNull': [{'$concat': [' tới ', '$address_info.direction']}, '']},
@@ -1183,9 +1174,18 @@ def updateNews(userId : str):
                         ]},
                     ]
                 },
-                # 'location': '$address_info.name',
-                # 'district': '$address_info.district',
-                # 'direction': '$address_info.direction',
+                'location': '$address_info.name',
+                'district': '$address_info.district',
+                'concatdistrict': {'$cond': {
+                                'if': {'$isArray': '$address_info.district'},
+                                'then': {'$reduce': {
+                                    'input': '$address_info.district',
+                                    'initialValue': '',
+                                    'in': {'$concat': ['$$value', ' ', {'$toString': '$$this'}]}
+                                }},
+                                'else': {'$toString': '$address_info.district'}
+                            }},
+                'direction': '$address_info.direction',
                 'state': {
                     '$concat': [
                         {'$ifNull': ['$speed_info.name', '']}, 
@@ -1198,17 +1198,24 @@ def updateNews(userId : str):
                 'distance': 1,
                 'notice': 1,
                 'status': 1,
+                # 'created_on': {
+                #     '$cond': {
+                #         'if': {'$eq': [{'$type': '$created_on'}, 'date']},
+                #         'then': {
+                #             '$dateToString': {
+                #                 'date': '$created_on',
+                #                 # 'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
+                #                 'format': '%Y-%m-%d'  # Adjust the format as needed
+                #             }
+                #         },
+                #         'else': '$created_on'
+                #     }
+                # }
                 'created_on': {
                     '$cond': {
                         'if': {'$eq': [{'$type': '$created_on'}, 'date']},
-                        'then': {
-                            '$dateToString': {
-                                'date': '$created_on',
-                                # 'format': '%Y-%m-%d %H:%M:%S'  # Adjust the format as needed
-                                'format': '%Y-%m-%d'  # Adjust the format as needed
-                            }
-                        },
-                        'else': '$created_on'
+                        'then': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d'}},
+                        'else': {'$substr': ['$created_on', 0, 10]}
                     }
                 }
             }
@@ -1270,6 +1277,34 @@ def updateReason(userId : str):
         }
     )
     return "Update lý do thành công", 200
+
+@app.route('/api/updateaddress/<userId>', methods=['POST'])
+def updateAddress(userId : str):
+    permission = getPermission(userId)
+    if (permission != "admin"):
+        return "Tài khoản không phải admin", 404
+    
+    _address = request.json
+    print(_address)
+
+    addressID = _address['_id']['$oid']
+
+    addresses.update_one(
+        {
+            "_id" : ObjectId(addressID)
+        },
+        {
+            "$set": {
+                "name" : _address['name'],
+                "direction" : _address['direction'],
+                "district" : _address['district'],
+            }
+        }
+    )
+
+    print(updateAddress)
+
+    return "Update địa điểm thành công", 200
 
 if __name__ == "__main__":
     # app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)

@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import { Row, Col, Button, Form, Skeleton, Card, type FormProps, Input, AutoComplete, theme, Select, DatePicker } from 'antd';
 import type { SelectProps } from 'antd';
 import { CloseOutlined, UndoOutlined, SearchOutlined } from '@ant-design/icons';
-import { DataGrid, GridColDef, GridCellEditStopParams, GridCellEditStopReasons, GridToolbar, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridCellEditStopParams, GridCellEditStopReasons, GridToolbar, GridToolbarContainer, GridToolbarExport, GridRenderCellParams } from '@mui/x-data-grid';
 import { styled } from '@mui/material/styles';
 import { Districts } from '../../../assets/data/district';
 import { Co2Sharp } from '@mui/icons-material';
@@ -190,39 +190,77 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     statusChoice = ['Chờ duyệt', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ']
   }
   else if (role == 'ROLE_DATAENTRY_EDITOR') {
-    statusChoice = ['Nháp', 'Chờ đọc', 'Lưu trữ']
+    statusChoice = ['Nháp', 'Chờ duyệt', 'Chờ đọc', 'Đã đọc', 'Không đọc']
   }
-
+  let stateChoice = ['Thông thoáng 40 km/h', 'Xe đông di chuyển ổn định 35 km/h', 'Xe đông di chuyển khó khăn 15 km/h', 'Xe đông di chuyển chậm 25 km/h', 'Ùn tắc 5 km/h']
   const columns: GridColDef<(typeof news)[number]>[] = [
     {
       field: 'ctv',
       headerName: 'Người chia sẻ',
       flex: 2,
+      editable: (role == 'ROLE_MC')? false : true,
     },
-    // {
-    //   field: 'ctv_phone',
-    //   headerName: 'Số điện thoại',
-    //   flex: 2,
-    // },
+    {
+      field: 'ctv_phone',
+      headerName: 'SĐT',
+      flex: 2,
+      editable: (role == 'ROLE_MC')? false : true,
+    },
     {
       field: 'location',
       headerName: 'Địa điểm',
-      flex: 8,
+      flex: 6,
+      editable: (role == 'ROLE_MC')? false : true,
     },
-    // {
-    //   field: 'direction',
-    //   headerName: 'Hướng đi',
-    //   flex: 4,
-    // },
-    // {
-    //   field: 'district',
-    //   headerName: 'Quận',
-    //   flex: 2,
-    // },
+    {
+      field: 'direction',
+      headerName: 'Hướng đi',
+      flex: 3,
+      editable: (role == 'ROLE_MC')? false : true,
+    },
+    {
+      field: 'district',
+      headerName: 'Quận',
+      flex: 3,
+      renderCell: (params: GridRenderCellParams<any>) => {
+        return  <Select
+                  mode="multiple"
+                  variant="borderless"
+                  allowClear
+                  style={{ width: '100%' }}
+                  placeholder="Vd: Quận 1, Quận 3, Quận Tân Bình"
+                  onChange={async (value: string[]) => {
+                    console.log('params.row: ', params.row)
+                    params.row.district = value
+                    if(params.row.district == '') {
+                      params.row.district = ['Quận khác']
+                    }
+                    const response = await fetch('/api/updatenews/' + userId, {
+                      method: "PATCH",
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(params.row)
+                    })
+                  }}
+                  defaultValue={params.row.district}
+                  options={Districts}
+                >
+                  <TextArea
+                    autoSize={{
+                      minRows: 1,
+                      maxRows: 3
+                    }}
+                    readOnly = {true}
+                  />
+                </Select>
+      },
+    },
     {
       field: 'state',
       headerName: 'Tình trạng',
       flex: 3,
+      type: 'singleSelect',
+      valueOptions: stateChoice,
+      editable: (role == 'ROLE_MC')? false : true,
     },
     // {
     //   field: 'speed',
@@ -233,11 +271,13 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
       field: 'distance',
       headerName: 'Tầm nhìn',
       flex: 1,
+      editable: (role == 'ROLE_MC')? false : true,
     },
     {
       field: 'reason',
       headerName: 'Nguyên nhân',
-      flex: 2,
+      flex: 3,
+      editable: (role == 'ROLE_MC')? false : true,
     },
     {
       field: 'status',
@@ -245,7 +285,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
       type: 'singleSelect',
       valueOptions: statusChoice,
       editable: true,
-      flex: 1.5,
+      flex: 3,
     },
     {
       field: 'notice',
@@ -256,7 +296,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     {
       field: 'created_on',
       headerName: 'Thời gian',
-      flex: 1.75,
+      flex: 2,
     },
   ];
 
@@ -274,6 +314,10 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
   }
   if (role == 'ROLE_MC' && newsToPresent[0] != null && newsToPresent.length > 1) {
     const to_remove = ['Nháp', 'Chờ duyệt']
+    newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
+  }
+  if (role == 'ROLE_EDITOR' && newsToPresent[0] != null && newsToPresent.length > 1) {
+    const to_remove = ['Nháp']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }
 
@@ -364,8 +408,8 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                   },
                   columns: {
                     columnVisibilityModel: {
-                      direction: false,
                       distance: false,
+                      created_on: false,
                     },
                   },
                 }}
@@ -374,6 +418,8 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                 disableRowSelectionOnClick
                 hideFooterSelectedRowCount={true}
                 processRowUpdate={async (row) => {
+
+                  console.log('row: ', row)
                   const response = await fetch('/api/updatenews/' + userId, {
                     method: "PATCH",
                     headers: { 'Content-Type': 'application/json' },
