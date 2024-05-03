@@ -664,8 +664,8 @@ def addNews(userId : str):
     
     startStatus = 'Chờ đọc'
 
-    if (permission == "thuky"):
-        startStatus = 'Chờ duyệt'
+    # if (permission == "thuky"):
+    #     startStatus = 'Chờ duyệt'
      
     datetime_now = datetime.now()
     _news = request.json
@@ -992,7 +992,14 @@ def internaladdCTV(name : str, phone_number: str):
     return {'$ref': "person_sharing", '$id': ObjectId(sharer['_id'])}
 
 def internaladdAddress(address: str, direction: str, district):
-    _address = addresses.find_one({'name': address, 'direction': direction, 'district': {'$all': district}})
+    # _address = addresses.find_one({'name': address, 'direction': direction, 'district': {'$all': district}})
+
+    _address = addresses.find_one({'name': address, 'direction': direction, 'district': district})
+    # if len(_address['district']) != len(district):
+    #     _address = None
+
+    # print(district)
+    # print(_address['district'])
 
     if not _address:
         # print ('cannot find address and create')
@@ -1034,7 +1041,6 @@ def updateNews(userId : str):
         return "Tài khoản không tồn tại", 404
     
     _news = request.json
-    # print(_news)
 
     if 'ctv_phone' not in _news:
         _news.update({'ctv_phone': 'thính giả'})
@@ -1302,7 +1308,7 @@ def updateAddress(userId : str):
         }
     )
 
-    print(updateAddress)
+    # print(updateAddress)
 
     return "Update địa điểm thành công", 200
 
