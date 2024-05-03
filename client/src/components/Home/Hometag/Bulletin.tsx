@@ -190,14 +190,14 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     statusChoice = ['Chờ duyệt', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ']
   }
   else if (role == 'ROLE_DATAENTRY_EDITOR') {
-    statusChoice = ['Nháp', 'Chờ duyệt', 'Chờ đọc', 'Đã đọc', 'Không đọc']
+    statusChoice = ['Nháp', 'Chờ duyệt', 'Chờ đọc', 'Đã đọc', 'Không đọc', 'Lưu trữ']
   }
   let stateChoice = ['Thông thoáng 40 km/h', 'Xe đông di chuyển ổn định 35 km/h', 'Xe đông di chuyển khó khăn 15 km/h', 'Xe đông di chuyển chậm 25 km/h', 'Ùn tắc 5 km/h']
   const columns: GridColDef<(typeof news)[number]>[] = [
     {
       field: 'ctv',
       headerName: 'Người chia sẻ',
-      flex: 2,
+      flex: 2.5,
       editable: (role == 'ROLE_MC')? false : true,
     },
     {
@@ -230,19 +230,24 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                   style={{ width: '100%' }}
                   placeholder="Vd: Quận 1, Quận 3, Quận Tân Bình"
                   onChange={async (value: string[]) => {
-                    console.log('params.row: ', params.row)
-                    params.row.district = value
-                    if(params.row.district == '') {
-                      params.row.district = ['Quận khác']
+                    if (role == 'ROLE_EDITOR' || role == 'ROLE_DATAENTRY' || role == 'ROLE_DATAENTRY_EDITOR' || role == 'ROLE_ADMIN') {
+                      // console.log('params.row: ', params.row)
+                      params.row.district = value
+                      if(params.row.district == '') {
+                        params.row.district = ['Quận khác']
+                      }
+                      console.log('params.row.district: ', params.row.district)
+                      const response = await fetch('/api/updatenews/' + userId, {
+                        method: "PATCH",
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(params.row)
+                      })
                     }
-                    const response = await fetch('/api/updatenews/' + userId, {
-                      method: "PATCH",
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(params.row)
-                    })
                   }}
-                  defaultValue={params.row.district}
+                  value={params.row.district}
+                  // defaultValue={params.row.district}
                   options={Districts}
+                  // disabled = {role == 'ROLE_MC'? true : false}
                 >
                   <TextArea
                     autoSize={{
