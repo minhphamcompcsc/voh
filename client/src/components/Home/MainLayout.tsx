@@ -35,7 +35,6 @@ const Home: React.FC = () => {
   const onChange = (checked: boolean) => {
     setOpen(checked);
   };
-
   const userId = window.localStorage.getItem("userId")
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();

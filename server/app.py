@@ -24,7 +24,7 @@ def index():
     return "success!"
 
 # Set up MongoDB connection and collection 
-client = MongoClient('mongodb://localhost:27017/') 
+client = MongoClient('mongodb://dev:XhD%26rCrDAM%2BOPaeXcjUmae%21%2BM@139.180.134.61:27017/admin') 
 
 # Create utraffic_voh database if it doesn't exist already 
 db = client['utraffic_voh'] 
