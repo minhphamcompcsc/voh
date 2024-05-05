@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Layout, theme, Tooltip, Avatar , Modal, Form, Checkbox, Input , Select, type SelectProps, type FormProps} from 'antd';
-import { LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, InfoCircleOutlined, UserOutlined } from '@ant-design/icons'
+import { Button, Layout, theme, Tooltip, Avatar , Modal, Form, Checkbox, Input , Select, type SelectProps, type FormProps,  FloatButton, Switch , Card } from 'antd';
+import { LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, InfoCircleOutlined, UserOutlined, CustomerServiceOutlined , CommentOutlined , CloseOutlined } from '@ant-design/icons'
 import Logo from './Hometag/Logo';
 import MenuList from './Hometag/MenuList';
 import "./Home.css";
@@ -27,8 +27,14 @@ const Home: React.FC = () => {
 
   const [darkTheme, setdarkTheme] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const [chatbox, setChatbox] = useState(false)
   const [noted, setNoted] = useState(true)
   const [oldPath, setOldPath] = useState("/")
+  const [open, setOpen] = useState(true);
+
+  const onChange = (checked: boolean) => {
+    setOpen(checked);
+  };
 
   const userId = window.localStorage.getItem("userId")
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -237,6 +243,35 @@ const Home: React.FC = () => {
                 {currentContent === '/dulieuadmin' && <Account themeClassName={themeClassName}/>}
                 {currentContent === '/nguyennhan' && <Reason themeClassName={themeClassName}/>}
                 {currentContent === '/hinhanh' && <ImageGen themeClassName={themeClassName}/>} 
+                <FloatButton onClick={() => setChatbox(!chatbox)} icon={<CommentOutlined />}/>
+                {
+                (chatbox) ?
+                <Card title='Nhóm chat chung'
+                  extra={<Button type='text' shape='circle' icon={<CloseOutlined />}
+                    onClick={() => {
+                      setChatbox(false)
+                    }} />}
+                  style={{
+                    width: '400px',
+                    height: '500px',
+                    position: 'absolute',
+                    right: 75,
+                    bottom: 10,
+                  }}
+                  bodyStyle={{ padding: 16 }}
+                  headStyle={{ textAlign: 'center', backgroundColor: '#f6f7fa'}}
+                >
+                    <div>
+                    <iframe 
+                    src="https://www.youtube.com/embed/tgbNymZ7vqY">
+                    </iframe>
+                  
+                    </div>
+                    <div>
+                      dsbfkjdsfn
+                    </div>
+                </Card> : null
+              }
               </Layout.Content>
             </Layout>
         </Layout>
