@@ -17,7 +17,7 @@ const Router = () => {
 
         return <>{element}</>;
     };
-
+    let role = localStorage.getItem('role')
     return (
         <BrowserRouter>
         <Routes>
@@ -31,7 +31,7 @@ const Router = () => {
             <Route path='/chatGPT' element={<ProtectedRoute element={<Home />} />}/>
             <Route path='/bantin' element={<ProtectedRoute element={<Home />} />}/>  
             <Route path='/thongke' element={<ProtectedRoute element={<Home />} />}/>  
-            <Route path='/dulieuadmin' element={<ProtectedRoute element={<Home />} />}/>  
+            <Route path='/dulieuadmin'  element={role == 'ROLE_ADMIN'? <ProtectedRoute element={<Home />} /> : <NotFound />}/>  
             <Route path='/hinhanh' element={<ProtectedRoute element={<Home />} />}/>
             <Route path='/nguyennhan' element={<ProtectedRoute element={<Home />} />}/> 
             <Route path='/demoVideo' element={<ProtectedRoute element={<Home />} />}/> 
