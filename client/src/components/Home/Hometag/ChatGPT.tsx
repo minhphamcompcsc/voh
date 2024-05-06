@@ -81,7 +81,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
     setMessages(newMessages)
     setIsTyping(true)
     const responseMessage: any = await processMessageToChatGPT(newMessages); 
-    const responseData = {
+    const responseData: MessageChat = {
       message: responseMessage,
       sentTime: "just now",
       direction: MessageDirection.Incoming,
@@ -158,7 +158,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
     setIsTyping(true);
 
     const responseMessage: any = await processMessageToChatGPT(newMessages); 
-    const responseData = {
+    const responseData: MessageChat = {
       message: responseMessage,
       sentTime: "just now",
       direction: MessageDirection.Incoming,
