@@ -17,6 +17,8 @@ import HomeContent from './Hometag/HomeContent'
 import Reason from './Hometag/Reason';
 import { PasswordProps } from 'antd/es/input';
 
+import ChatRoom from "./ChatRoom";
+
 const { Header, Sider} =  Layout;
 type FieldType = {
   oldpassword: string;
@@ -260,15 +262,7 @@ const Home: React.FC = () => {
                   bodyStyle={{ padding: 16 }}
                   headStyle={{ textAlign: 'center', backgroundColor: '#f6f7fa'}}
                 >
-                    <div>
-                    <iframe 
-                    src="https://www.youtube.com/embed/tgbNymZ7vqY">
-                    </iframe>
-                  
-                    </div>
-                    <div>
-                      dsbfkjdsfn
-                    </div>
+                    <ChatRoom />
                 </Card> : null
               }
               </Layout.Content>

@@ -15,7 +15,9 @@ interface MessageChat {
   sentTime?: string;
   sender: string;
   action?: any;
+  position: 0 | "normal" | 2 | 1 | "single" | "first" | "last" | 3;
 }
+
 
 interface ChatGPTProps {
   themeClassName: string;
@@ -28,19 +30,22 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
       sentTime: "just now",
       direction: MessageDirection.Incoming,
       sender: "ChatGPT",
+      position: "normal",
     },
     {
       message: "Thời tiết quận 10 bây giờ như thế nào?",
       sentTime: "just now",
       direction: MessageDirection.Outgoing,
       sender: "user",
+      position: "normal",
       action: () => handleRecommendButtonClick("Thời tiết quận 10 bây giờ như thế nào?"),
-    },
+    },  
     {
       message: "Tình hình giao thông ở ngã tư 7 hiền.",
       sentTime: "just now",
       direction: MessageDirection.Outgoing,
       sender: "user",
+      position: "normal",
       action: () => handleRecommendButtonClick("Tình hình giao thông ở ngã tư 7 hiền."),
     },
     {
@@ -48,6 +53,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
       sentTime: "just now",
       direction: MessageDirection.Outgoing,
       sender: "user",
+      position: "normal",
       action: () => handleRecommendButtonClick("Chiều nay thành phố Hồ Chí Minh dự báo có mưa không?"),
     }
   ]);
@@ -62,12 +68,14 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
       sentTime: "just now",
       direction: MessageDirection.Incoming,
       sender: "ChatGPT",
+      position: "normal",
       },
       {
         message: message,
         direction: MessageDirection.Outgoing,
         sentTime: "just now",
         sender: "user",
+        position: "normal",
       }]
     
     setMessages(newMessages)
@@ -78,6 +86,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
       sentTime: "just now",
       direction: MessageDirection.Incoming,
       sender: "ChatGPT",
+      position: "normal",
     }
 
     setMessages([...newMessages, responseData])
@@ -91,6 +100,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
       direction: MessageDirection.Outgoing,
       sentTime: "just now",
       sender: "user",
+      position: "normal",
     };
     let newMessages: MessageChat[] = [];
     console.log(JSON.stringify(messages))
@@ -101,12 +111,14 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
         sentTime: "just now",
         direction: MessageDirection.Incoming,
         sender: "ChatGPT",
+        position: "normal",
       },
       {
         message: "Thời tiết quận 10 bây giờ như thế nào?",
         sentTime: "just now",
         direction: MessageDirection.Outgoing,
         sender: "user",
+        position: "normal",
         action: () => handleRecommendButtonClick("Thời tiết quận 10 bây giờ như thế nào?"),
       },
       {
@@ -114,6 +126,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
         sentTime: "just now",
         direction: MessageDirection.Outgoing,
         sender: "user",
+        position: "normal",
         action: () => handleRecommendButtonClick("Tình hình giao thông ở ngã tư 7 hiền."),
       },
       {
@@ -121,6 +134,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
         sentTime: "just now",
         direction: MessageDirection.Outgoing,
         sender: "user",
+        position: "normal",
         action: () => handleRecommendButtonClick("Chiều nay thành phố Hồ Chí Minh dự báo có mưa không?"),
       }
     ])){
@@ -131,6 +145,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
         sentTime: "just now",
         direction: MessageDirection.Incoming,
         sender: "ChatGPT",
+        position: "normal",
       }, newMessage];
     }
     else{
@@ -148,6 +163,7 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
       sentTime: "just now",
       direction: MessageDirection.Incoming,
       sender: "ChatGPT",
+      position: "normal",
     }
     setMessages([...newMessages, responseData])
   };        
@@ -190,10 +206,10 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
       </ConversationHeader> */}
 
         <ChatContainer>       
-          {/* <MessageList 
+          <MessageList 
             className={`${themeClassName}-incoming ${themeClassName}-${isRecommend}-outgoing ${themeClassName}-messagelist`}
             scrollBehavior="auto" 
-            typingIndicator={isTyping ? <TypingIndicator content="NOIS GPT is typing" /> : null}
+            typingIndicator={isTyping ? <TypingIndicator content="VOH GPT is typing" /> : null}
           >
             {messages.map((message: MessageChat, i: number) => {
               return <div style={{display: 'block'}} onClick={message.action}>
@@ -201,8 +217,9 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ themeClassName }) => {
                 </div>;
             })}
           </MessageList>
-          <MessageInput placeholder="Type your message here ..." autoFocus onSend={handleSend} attachButton={false}/> */}
+          <MessageInput placeholder="Type your message here ..." autoFocus onSend={handleSend} attachButton={false}/>
           
+
         </ChatContainer>
       </MainContainer>
     </div>
