@@ -17,6 +17,17 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # CORS(app)
 socketio = SocketIO(app,cors_allowed_origins="*")
 
+socketio = SocketIO(app, cors_allowed_origins='http://localhost:3000')
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    # Broadcast to all users
+    emit('receive_message', data, broadcast=True)
+
 bcrypt = Bcrypt(app) 
 
 @app.route('/')
