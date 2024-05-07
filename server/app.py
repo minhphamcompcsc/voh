@@ -15,19 +15,17 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app, resources={r"/*": {"origins": "*"}})
 # CORS(app)
-socketio = SocketIO(app,cors_allowed_origins="*")
-
+# socketio = SocketIO(app,cors_allowed_origins="*")
 socketio = SocketIO(app, cors_allowed_origins='http://localhost:3000')
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
+# @socketio.on('connect')
+# def handle_connect():
+#     print('Client connected')
 
 @socketio.on('send_message')
 def handle_send_message(data):
     # Broadcast to all users
     emit('receive_message', data, broadcast=True)
-
 bcrypt = Bcrypt(app) 
 
 @app.route('/')
@@ -35,7 +33,7 @@ def index():
     return "success!"
 
 # Set up MongoDB connection and collection 
-client = MongoClient('mongodb://dev:XhD%26rCrDAM%2BOPaeXcjUmae%21%2BM@139.180.134.61:27017/admin') 
+client = MongoClient('mongodb://localhost:27017/') 
 
 # Create utraffic_voh database if it doesn't exist already 
 db = client['utraffic_voh'] 
@@ -47,6 +45,7 @@ addresses = db['address']
 sharers = db['person_sharing']
 reasons = db['reason']
 traffic_state = db['speed']
+messages = db['messages']
 
 @app.route('/api/authenticate', methods=['POST'])
 def authenticate():
@@ -1326,3 +1325,4 @@ def updateAddress(userId : str):
 if __name__ == "__main__":
     # app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
     socketio.run(app, debug=True,port=5000)
+

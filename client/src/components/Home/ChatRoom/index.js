@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Stack, Grid, Box, TextField, Button, Typography } from "@mui/material";
-
+import { SendOutlined } from '@ant-design/icons'
 import io from "socket.io-client";
 
 const socket = io("http://localhost:5000");
@@ -74,7 +74,7 @@ function ChatRoom() {
               item
               sx={(theme) => ({
                 alignSelf: self ? "flex-end" : "flex-start",
-                maxWidth: "50%",
+                maxWidth: "75%",
               })}
             >
               <Typography
@@ -90,7 +90,7 @@ function ChatRoom() {
                 sx={(theme) => ({
                   backgroundColor: self
                     ? '#83c8ff'
-                    : '#e4e4e4',
+                    : '#f0f0f0',
                   borderRadius: theme.shape.borderRadius,
                 })}
                 px={1}
@@ -128,14 +128,16 @@ function ChatRoom() {
             border: "1px solid gray",
             borderRadius: theme.shape.borderRadius,
             paddingLeft: 2,
+            backgroundColor: '#f0f0f0',
           })}
           InputProps={{
             disableUnderline: true,
           }}
+          placeholder = "Aa"
         />
       </Grid>
       <Grid item>
-        <Button type="submit">Gửi</Button>
+        <Button type="submit"><SendOutlined /></Button>
       </Grid>
     </Grid>
   );
@@ -160,7 +162,7 @@ function ChatRoom() {
           <div style={{height: '370px', overflowY: 'scroll'}} ref={scrollRef} >
             {messagesView()}
           </div>
-          <div>
+          <div style = {{}} >
             {controlsView()}
           </div> 
         </Stack>
