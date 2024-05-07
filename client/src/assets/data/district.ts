@@ -24,5 +24,7 @@ export const Districts = [
 	{value: 'Củ Chi'}, 
 	{value: 'Hóc Môn'},
 	{value: 'Nhà Bè'},
+	{value: 'Long An'},
+	{value: 'Đồng Nai'}, 
 	{value: 'Quận khác'} 
 ]

@@ -16,6 +16,7 @@ import ImageGen from './Hometag/ImageGen';
 import HomeContent from './Hometag/HomeContent'
 import Reason from './Hometag/Reason';
 import { PasswordProps } from 'antd/es/input';
+import ChatRoom from "./ChatRoom";
 
 const { Header, Sider} =  Layout;
 type FieldType = {
@@ -38,6 +39,7 @@ const Home: React.FC = () => {
   const userId = window.localStorage.getItem("userId")
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const antdTheme = theme.useToken()
   
   const onFinish: FormProps<FieldType>["onFinish"] = async (data) => {
       const response = await fetch('/api/changepassword/' + userId,{
@@ -245,7 +247,7 @@ const Home: React.FC = () => {
                 <FloatButton onClick={() => setChatbox(!chatbox)} icon={<CommentOutlined />}/>
                 {
                 (chatbox) ?
-                <Card title='Nhóm chat chung'
+                <Card title='Nhóm chat VOH'
                   extra={<Button type='text' shape='circle' icon={<CloseOutlined />}
                     onClick={() => {
                       setChatbox(false)
@@ -256,11 +258,12 @@ const Home: React.FC = () => {
                     position: 'absolute',
                     right: 75,
                     bottom: 10,
+                    borderColor: antdTheme.token.colorBorder,
                   }}
-                  bodyStyle={{ padding: 16 }}
-                  headStyle={{ textAlign: 'center', backgroundColor: '#f6f7fa'}}
+                  bodyStyle={{ padding: 0}}
+                  headStyle={{ textAlign: 'center', backgroundColor: '#fbf3e4'}}
                 >
-                    <div>
+                    {/* <div>
                     <iframe 
                     src="https://www.youtube.com/embed/tgbNymZ7vqY">
                     </iframe>
@@ -268,7 +271,8 @@ const Home: React.FC = () => {
                     </div>
                     <div>
                       dsbfkjdsfn
-                    </div>
+                    </div> */}
+                    <ChatRoom />
                 </Card> : null
               }
               </Layout.Content>
