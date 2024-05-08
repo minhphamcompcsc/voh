@@ -38,7 +38,7 @@ function ChatRoom() {
         // const data = e;
 
         const lastMessage = chatMessages.length? chatMessages[chatMessages.length - 1] : null;
-        if (!(lastMessage?.message === data.message && lastMessage?.createdDate === data.createdDate)) {
+        if (!(lastMessage?.message === data.message && lastMessage?.created_on === data.created_on)) {
           chatMessages.push(data);
           setChatMessages([...chatMessages]);
         }
@@ -52,7 +52,7 @@ function ChatRoom() {
   const sendMessage = (e) => {
     e.preventDefault();
 
-    const data = {userId, username, message, createdDate: new Date() };
+    const data = {userId, username, message, created_on: new Date() };
 
     if (message != '') {
       socket.emit("send_message", JSON.stringify(data));
@@ -71,7 +71,7 @@ function ChatRoom() {
       sx={{ flex: 1, overflowY: "auto" }}
     >
       {chatMessages?.map(
-        ({ username: otherUsername, message, createdDate }, index) => {
+        ({ username: otherUsername, message, created_on }, index) => {
           const self = otherUsername === username;
 
           return (
@@ -104,15 +104,15 @@ function ChatRoom() {
                 {message}
               </Typography>
 
-              {/* <Typography
+              <Typography
                 fontSize={11}
                 sx={{
                   textAlign: self ? "right" : "left",
                 }}
                 px={1}
               >
-                {format(new Date(createdDate), "hh:mm a")}
-              </Typography> */}
+                {created_on}
+              </Typography>
             </Grid>
           );
         }

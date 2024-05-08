@@ -21,13 +21,7 @@ socketio = SocketIO(app, cors_allowed_origins='http://localhost:3000')
 # @socketio.on('connect')
 # def handle_connect():
 #     print('Client connected')
-
-@socketio.on('send_message')
-def handle_send_message(data):
-    # Broadcast to all users
-    emit('receive_message', data, broadcast=True)
 bcrypt = Bcrypt(app) 
-
 @app.route('/')
 def index():
     return "success!"
@@ -114,7 +108,7 @@ def getMessages():
                 '_id': 1,
                 'message': 1,
                 'username': '$sender_info.name',
-                'created_on': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d'}}
+                'created_on': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d %H:%M:%S'}}
             }
         }
     ]
@@ -124,6 +118,59 @@ def getMessages():
     jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
     
     return jsonData
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    # Broadcast to all users
+    datetime_now = datetime.now()
+    data_dict = json.loads(data)
+    new_message = {
+        'sender': {
+            '$ref': "user",
+            '$id': ObjectId(data_dict['userId'])
+        },
+        'message': data_dict['message'],
+        'created_on': datetime_now
+    }
+    messageId =  messages.insert_one(new_message).inserted_id
+    pipeline = [
+        {
+            '$match': {
+                '_id': ObjectId(messageId)
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'user',
+                'localField': 'sender.$id',
+                'foreignField': '_id',
+                'as': 'sender_info'
+            }
+        },
+        {
+            '$unwind': '$sender_info'
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'message': 1,
+                'username': '$sender_info.name',
+                'created_on': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d %H:%M:%S'}}
+            }
+        }
+    ]
+
+    listCursor = list(messages.aggregate(pipeline))
+    
+    # jsonData = json.dumps(listCursor)
+    # print(jsonData)
+    # print(data)
+    data_dict.update({'created_on' : listCursor[0]['created_on']})
+    data = json.dumps(data_dict)
+
+    emit('receive_message', data, broadcast=True)
+
+
 
 @app.route('/api/changepassword/<userId>', methods=['POST'])
 def changepassword(userId : str):
