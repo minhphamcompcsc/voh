@@ -14,6 +14,18 @@ function ChatRoom() {
   const [chatMessages, setChatMessages] = useState([]);
 
   useEffect(() => {
+    async function getMessages() {
+      const response = await fetch('/api/messages', {
+        method: "GET"
+      })
+      const messages = await response.json()
+  
+      setChatMessages(messages)
+    }
+    getMessages()
+  }, []);
+
+  useEffect(() => {
     // Scroll to bottom if new message received
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -23,17 +35,10 @@ function ChatRoom() {
     const setupEvents = () => {
       socket.on("receive_message", (e) => {
         const data = JSON.parse(e);
+        // const data = e;
 
-        const lastMessage = chatMessages.length
-          ? chatMessages[chatMessages.length - 1]
-          : null;
-
-        if (
-          !(
-            lastMessage?.message === data.message &&
-            lastMessage?.createdDate === data.createdDate
-          )
-        ) {
+        const lastMessage = chatMessages.length? chatMessages[chatMessages.length - 1] : null;
+        if (!(lastMessage?.message === data.message && lastMessage?.createdDate === data.createdDate)) {
           chatMessages.push(data);
           setChatMessages([...chatMessages]);
         }
@@ -51,6 +56,7 @@ function ChatRoom() {
 
     if (message != '') {
       socket.emit("send_message", JSON.stringify(data));
+      // socket.emit("send_message", data);
     }
     
     setMessage("");

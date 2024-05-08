@@ -90,6 +90,41 @@ def getPermission(userId : str):
         return 'btv'
     return 'none'
 
+@app.route('/api/messages', methods=['GET'])
+def getMessages():
+    pipeline = [
+        {
+            '$sort': {
+                'created_on': 1
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'user',
+                'localField': 'sender.$id',
+                'foreignField': '_id',
+                'as': 'sender_info'
+            }
+        },
+        {
+            '$unwind': '$sender_info'
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'message': 1,
+                'username': '$sender_info.name',
+                'created_on': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d'}}
+            }
+        }
+    ]
+
+    listCursor = list(messages.aggregate(pipeline))
+    
+    jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
+    
+    return jsonData
+
 @app.route('/api/changepassword/<userId>', methods=['POST'])
 def changepassword(userId : str):
     # print(userId)
