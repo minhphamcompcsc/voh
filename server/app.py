@@ -86,7 +86,19 @@ def getPermission(userId : str):
 
 @app.route('/api/messages', methods=['GET'])
 def getMessages():
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=90)
+
     pipeline = [
+        {
+            "$match": {
+                "created_on": {
+                    "$gte": start_date,
+                    "$lte": end_date
+                }
+            }
+        },
         {
             '$sort': {
                 'created_on': 1
