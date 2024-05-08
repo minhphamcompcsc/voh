@@ -17,6 +17,7 @@ import HomeContent from './Hometag/HomeContent'
 import Reason from './Hometag/Reason';
 import { PasswordProps } from 'antd/es/input';
 import ChatRoom from "./ChatRoom";
+import { io } from "socket.io-client";
 
 const { Header, Sider} =  Layout;
 type FieldType = {
@@ -29,6 +30,7 @@ const Home: React.FC = () => {
   const [darkTheme, setdarkTheme] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [chatbox, setChatbox] = useState(false)
+  const [messNoti, setMessNoti] = useState(false)
   const [noted, setNoted] = useState(true)
   const [oldPath, setOldPath] = useState("/")
   const [open, setOpen] = useState(true);
@@ -119,24 +121,33 @@ const Home: React.FC = () => {
       title = ' ';
     } 
   
+    const socket = io("http://127.0.0.1:5000", {
+      transports: ["websocket"]
+    });
+
+    let temp = chatbox;
     useEffect(() => {
-        function handleResize() {    
-          if (window.innerWidth < 600) {
-            setCollapsed(true);
-          }
-          else if (window.innerWidth >= 600) {
-            setCollapsed(false);
-          }
+      function handleResize() {    
+        if (window.innerWidth < 600) {
+          setCollapsed(true);
         }
-    
-        window.addEventListener('resize', handleResize);
-    
-        handleResize();
-        return () => {
-          window.removeEventListener('resize', handleResize);
-          
-        };
-      }, []);
+        else if (window.innerWidth >= 600) {
+          setCollapsed(false);
+        }
+      }
+  
+      socket.on("receive_message", (e) => {
+        setMessNoti(true)
+      });
+
+      window.addEventListener('resize', handleResize);
+  
+      handleResize();
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        
+      };
+    }, []);
 
     useEffect(() => {
       setCurrentContent(currentRoute === '/' ? '/trangchu' : currentRoute)
@@ -244,13 +255,14 @@ const Home: React.FC = () => {
                 {currentContent === '/dulieuadmin' && <Account themeClassName={themeClassName}/>}
                 {currentContent === '/nguyennhan' && <Reason themeClassName={themeClassName}/>}
                 {currentContent === '/hinhanh' && <ImageGen themeClassName={themeClassName}/>} 
-                <FloatButton onClick={() => setChatbox(!chatbox)} icon={<CommentOutlined />}/>
-                {
+                <FloatButton badge={{dot: (!chatbox && messNoti)}} onClick={() => {setChatbox(!chatbox); setMessNoti(false)}} icon={<CommentOutlined />}/>
+              {
                 (chatbox) ?
                 <Card title='Nhóm chat VOH'
                   extra={<Button type='text' shape='circle' icon={<CloseOutlined />}
                     onClick={() => {
-                      setChatbox(false)
+                      setChatbox(false);
+                      setMessNoti(false)
                     }} />}
                   style={{
                     width: '400px',
