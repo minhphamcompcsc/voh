@@ -393,7 +393,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
           : <Col
             span={(formOpen) ? 16 : 24}
           >
-            <Box sx={{ height: '600px', width: '100%' }}>
+            <Box sx={{ height: '625px', width: '100%' }}>
               <DataGrid
                 sx={{
                   "& .MuiDataGrid-cell": {
