@@ -146,31 +146,44 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
   }, [])
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (data) => {
-    if (data['personSharing'] == undefined) {
+    if (data['personSharing'] == undefined || data['personSharing'] == '') {
       data['personSharing'] = 'thính giả'
     }
-    if (data['phone_number'] == undefined) {
+    if (data['phone_number'] == undefined || data['phone_number'] == '') {
       data['phone_number'] = ''
     }
-    if (data['direction'] == undefined) {
+    if (data['direction'] == undefined || data['direction'] == '') {
       data['direction'] = ''
     }
     if (data['district'] == undefined || data['district'][0] == undefined || data['district'][0] == '') {
       data['district'] = ['Quận khác']
     }
-    if (data['reason'] == undefined) {
+    if (data['reason'] == undefined || data['reason'] == '') {
       data['reason'] = 'Chưa rõ nguyên nhân'
     }
-    if (data['notice'] == undefined) {
+    if (data['notice'] == undefined || data['notice'] == '') {
       data['notice'] = ''
     }
-    console.log('data: ', data)
+    // console.log('data: ', data)
     const response = await fetch('/api/addnews/' + userId, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     })
     const _news_ = await response.json()
+    if(response.ok){
+      form.setFieldsValue({
+        personSharing: undefined,
+        phone_number: undefined,
+        address: undefined,
+        direction: undefined,
+        district: undefined,
+        state: undefined,
+        speed: undefined,
+        reason: undefined,
+        note: undefined
+      })
+    }
     // console.log('response: ', _news_)
     // console.log('news: ', news)
 
@@ -380,7 +393,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
           : <Col
             span={(formOpen) ? 16 : 24}
           >
-            <Box sx={{ height: '600px', width: '100%' }}>
+            <Box sx={{ height: '625px', width: '100%' }}>
               <DataGrid
                 sx={{
                   "& .MuiDataGrid-cell": {

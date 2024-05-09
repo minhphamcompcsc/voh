@@ -139,7 +139,7 @@ function ChatRoom() {
           InputProps={{
             disableUnderline: true,
           }}
-          placeholder = "Aa"
+          placeholder = "Tin nhắn"
         />
       </Grid>
       <Grid item>

@@ -271,6 +271,7 @@ const Home: React.FC = () => {
                     right: 75,
                     bottom: 10,
                     borderColor: antdTheme.token.colorBorder,
+                    zIndex: 1000
                   }}
                   bodyStyle={{ padding: 0}}
                   headStyle={{ textAlign: 'center', backgroundColor: '#fbf3e4'}}
