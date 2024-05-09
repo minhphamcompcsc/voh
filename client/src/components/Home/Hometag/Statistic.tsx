@@ -53,6 +53,7 @@ function StatisticsPage() {
     // const uniqueDistricts: number[] = Array.from(new Set(news.map(p => p.concatdistrict)));
     
     const uniqueDistricts: number[] = Array.from(new Set(news.flatMap(item => item.district)));
+    uniqueDistricts.sort();
 
     const news_per_date_counts = uniqueDates.map((dates: any) => (
       news.filter(item => item.created_on === dates).length
