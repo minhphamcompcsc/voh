@@ -99,7 +99,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     setReasons(_reasons_)
   }
   async function getNews() {
-    console.log("dateRangeString", dateRangeString)
+    // console.log("dateRangeString", dateRangeString)
     const response = await fetch(newsUri, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
@@ -109,13 +109,14 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
 
     setNews(_news_)
   }
+  
+  const socket = io("http://127.0.0.1:5000", {
+    transports: ["websocket"]
+  });
 
   useEffect(() => {
     fetchData()
     getNews()
-    const socket = io("http://127.0.0.1:5000", {
-      transports: ["websocket"]
-    });
 
     socket.on("add_news", (_new_) => {
       setNews(prevNews => [
@@ -154,7 +155,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     if (data['direction'] == undefined) {
       data['direction'] = ''
     }
-    if (data['district'] == undefined) {
+    if (data['district'] == undefined || data['district'][0] == undefined || data['district'][0] == '') {
       data['district'] = ['Quận khác']
     }
     if (data['reason'] == undefined) {

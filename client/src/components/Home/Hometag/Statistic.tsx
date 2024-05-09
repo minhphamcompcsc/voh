@@ -21,6 +21,7 @@ function StatisticsPage() {
     labels: [],
     datasets: []
   })
+  const [dataTypeToPresent, setDataTypeToPresent] = useState<any>("TrafficperDistrict")
   type RangeValue = [Dayjs | null, Dayjs | null] | null;
   const [dateRange, setDateRange] = useState<RangeValue>([dayjs().subtract(7, 'days'), dayjs()]);
   const [dateRangeString, setDateRangeString] = useState<any[]>([dayjs().subtract(7, 'days').format('YYYY-MM-DD'), dayjs().format('YYYY-MM-DD')]);
@@ -49,7 +50,10 @@ function StatisticsPage() {
   function statistic(news: any[], require: string) {
     const uniqueDates: number[] = Array.from(new Set(news.map(p => p.created_on)));
     const uniqueStates: number[] = Array.from(new Set(news.map(p => p.state)));
-    const uniqueDistricts: number[] = Array.from(new Set(news.map(p => p.district)));
+    // const uniqueDistricts: number[] = Array.from(new Set(news.map(p => p.concatdistrict)));
+    
+    const uniqueDistricts: number[] = Array.from(new Set(news.flatMap(item => item.district)));
+    uniqueDistricts.sort();
 
     const news_per_date_counts = uniqueDates.map((dates: any) => (
       news.filter(item => item.created_on === dates).length
@@ -67,9 +71,14 @@ function StatisticsPage() {
       label: traffics,
       data: uniqueDistricts.map((districts: any) => (
         news.filter(item => item.state === traffics)
-          .filter(item => item.district === districts).length
+          .filter(item => item.district.includes(districts)).length
       ))
     }));
+
+    // const news_per_traffic_counts_per_district = news.map(item => ({
+    //   label: item.value,
+    //   dataset: uniqueDistricts.map(district => Number(item.district.includes(district)))
+    // }));
 
     const TrafficperDistrict = {
       labels: uniqueDistricts,
@@ -89,6 +98,7 @@ function StatisticsPage() {
       }]
     }
     if (require == 'perDistrict') {
+      console.log(TrafficperDistrict)
       return TrafficperDistrict
     } else if (require == 'perDate') {
       return TrafficperDate
@@ -189,6 +199,16 @@ function StatisticsPage() {
               })
               const _news_ = await response.json()
               setNews(_news_.reverse())
+              if (dataTypeToPresent == 'TrafficperDistrict') {
+                let statResult = statistic(_news_, 'perDistrict')
+                setDataToPresent(statResult)
+              } else if (dataTypeToPresent == 'TrafficperDate') {
+                let statResult = statistic(_news_, 'perDate')
+                setDataToPresent(statResult)
+              } else if (dataTypeToPresent == 'TotalbyDate') {
+                let statResult = statistic(_news_, 'totalDate')
+                setDataToPresent(statResult)
+              }
             }}
           >
           </Button>
@@ -198,7 +218,8 @@ function StatisticsPage() {
         <Col span={24} >
           <Tabs
             onChange={(key: string) => {
-              console.log(key);
+              // console.log(key);
+              setDataTypeToPresent(key)
               if (key == 'TrafficperDistrict') {
                 // setDataToPresent(TrafficperDistrict)
                 let statResult = statistic(news, 'perDistrict')

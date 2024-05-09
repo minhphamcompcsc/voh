@@ -15,27 +15,19 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app, resources={r"/*": {"origins": "*"}})
 # CORS(app)
-socketio = SocketIO(app,cors_allowed_origins="*")
-
+# socketio = SocketIO(app,cors_allowed_origins="*")
 socketio = SocketIO(app, cors_allowed_origins='http://localhost:3000')
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-
-@socketio.on('send_message')
-def handle_send_message(data):
-    # Broadcast to all users
-    emit('receive_message', data, broadcast=True)
-
+# @socketio.on('connect')
+# def handle_connect():
+#     print('Client connected')
 bcrypt = Bcrypt(app) 
-
 @app.route('/')
 def index():
     return "success!"
 
 # Set up MongoDB connection and collection 
-client = MongoClient('mongodb://dev:XhD%26rCrDAM%2BOPaeXcjUmae%21%2BM@139.180.134.61:27017/admin') 
+client = MongoClient('mongodb://localhost:27017/') 
 
 # Create utraffic_voh database if it doesn't exist already 
 db = client['utraffic_voh'] 
@@ -47,6 +39,7 @@ addresses = db['address']
 sharers = db['person_sharing']
 reasons = db['reason']
 traffic_state = db['speed']
+messages = db['messages']
 
 @app.route('/api/authenticate', methods=['POST'])
 def authenticate():
@@ -90,6 +83,106 @@ def getPermission(userId : str):
     elif (account['role'] == 'ROLE_EDITOR'):
         return 'btv'
     return 'none'
+
+@app.route('/api/messages', methods=['GET'])
+def getMessages():
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=90)
+
+    pipeline = [
+        {
+            "$match": {
+                "created_on": {
+                    "$gte": start_date,
+                    "$lte": end_date
+                }
+            }
+        },
+        {
+            '$sort': {
+                'created_on': 1
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'user',
+                'localField': 'sender.$id',
+                'foreignField': '_id',
+                'as': 'sender_info'
+            }
+        },
+        {
+            '$unwind': '$sender_info'
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'message': 1,
+                'username': '$sender_info.name',
+                'created_on': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d %H:%M:%S'}}
+            }
+        }
+    ]
+
+    listCursor = list(messages.aggregate(pipeline))
+    
+    jsonData = dumps(listCursor, ensure_ascii=False).encode('utf8')
+    
+    return jsonData
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    # Broadcast to all users
+    datetime_now = datetime.now()
+    data_dict = json.loads(data)
+    new_message = {
+        'sender': {
+            '$ref': "user",
+            '$id': ObjectId(data_dict['userId'])
+        },
+        'message': data_dict['message'],
+        'created_on': datetime_now
+    }
+    messageId =  messages.insert_one(new_message).inserted_id
+    pipeline = [
+        {
+            '$match': {
+                '_id': ObjectId(messageId)
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'user',
+                'localField': 'sender.$id',
+                'foreignField': '_id',
+                'as': 'sender_info'
+            }
+        },
+        {
+            '$unwind': '$sender_info'
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'message': 1,
+                'username': '$sender_info.name',
+                'created_on': {'$dateToString': {'date': '$created_on', 'format': '%Y-%m-%d %H:%M:%S'}}
+            }
+        }
+    ]
+
+    listCursor = list(messages.aggregate(pipeline))
+    
+    # jsonData = json.dumps(listCursor)
+    # print(jsonData)
+    # print(data)
+    data_dict.update({'created_on' : listCursor[0]['created_on']})
+    data = json.dumps(data_dict)
+
+    emit('receive_message', data, broadcast=True)
+
+
 
 @app.route('/api/changepassword/<userId>', methods=['POST'])
 def changepassword(userId : str):

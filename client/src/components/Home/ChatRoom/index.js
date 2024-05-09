@@ -1,18 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Stack, Grid, Box, TextField, Button, Typography } from "@mui/material";
+import { SendOutlined } from '@ant-design/icons'
 import io from "socket.io-client";
-import { format } from "date-fns";
-
-import UsernameDialog from "./UsernameDialog";
 
 const socket = io("http://localhost:5000");
 
 function ChatRoom() {
   const scrollRef = useRef();
 
-  const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState(localStorage.getItem('name'));
+  const [userId, setUserId] = useState(localStorage.getItem('userId'));
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
+
+  useEffect(() => {
+    async function getMessages() {
+      const response = await fetch('/api/messages', {
+        method: "GET"
+      })
+      const messages = await response.json()
+  
+      setChatMessages(messages)
+    }
+    getMessages()
+  }, []);
 
   useEffect(() => {
     // Scroll to bottom if new message received
@@ -24,17 +35,10 @@ function ChatRoom() {
     const setupEvents = () => {
       socket.on("receive_message", (e) => {
         const data = JSON.parse(e);
+        // const data = e;
 
-        const lastMessage = chatMessages.length
-          ? chatMessages[chatMessages.length - 1]
-          : null;
-
-        if (
-          !(
-            lastMessage?.message === data.message &&
-            lastMessage?.createdDate === data.createdDate
-          )
-        ) {
+        const lastMessage = chatMessages.length? chatMessages[chatMessages.length - 1] : null;
+        if (!(lastMessage?.message === data.message && lastMessage?.created_on === data.created_on)) {
           chatMessages.push(data);
           setChatMessages([...chatMessages]);
         }
@@ -48,31 +52,26 @@ function ChatRoom() {
   const sendMessage = (e) => {
     e.preventDefault();
 
-    const data = { username, message, createdDate: new Date() };
+    const data = {userId, username, message, created_on: new Date() };
 
-    socket.emit("send_message", JSON.stringify(data));
-
+    if (message != '') {
+      socket.emit("send_message", JSON.stringify(data));
+      // socket.emit("send_message", data);
+    }
+    
     setMessage("");
   };
-
-  // Welcome User message
-  const welcomeMessageView = () => (
-    <Grid container item padding={3}>
-      <Grid item>Welcome {username}</Grid>
-    </Grid>
-  );
 
   // Messages View
   const messagesView = () => (
     <Stack
-      ref={scrollRef}
       direction="column"
       spacing={3}
       px={2}
       sx={{ flex: 1, overflowY: "auto" }}
     >
       {chatMessages?.map(
-        ({ username: otherUsername, message, createdDate }, index) => {
+        ({ username: otherUsername, message, created_on }, index) => {
           const self = otherUsername === username;
 
           return (
@@ -81,7 +80,7 @@ function ChatRoom() {
               item
               sx={(theme) => ({
                 alignSelf: self ? "flex-end" : "flex-start",
-                maxWidth: "50%",
+                maxWidth: "75%",
               })}
             >
               <Typography
@@ -96,8 +95,8 @@ function ChatRoom() {
               <Typography
                 sx={(theme) => ({
                   backgroundColor: self
-                    ? theme.palette.primary.light
-                    : theme.palette.grey["400"],
+                    ? '#83c8ff'
+                    : '#f0f0f0',
                   borderRadius: theme.shape.borderRadius,
                 })}
                 px={1}
@@ -112,7 +111,7 @@ function ChatRoom() {
                 }}
                 px={1}
               >
-                {format(new Date(createdDate), "hh:mm a")}
+                {created_on}
               </Typography>
             </Grid>
           );
@@ -123,7 +122,7 @@ function ChatRoom() {
 
   // Send Message Input
   const controlsView = () => (
-    <Grid container item padding={3} alignItems="center">
+    <Grid container item padding={1} alignItems="center">
       <Grid item flex={1}>
         <TextField
           autoFocus
@@ -135,14 +134,16 @@ function ChatRoom() {
             border: "1px solid gray",
             borderRadius: theme.shape.borderRadius,
             paddingLeft: 2,
+            backgroundColor: '#f0f0f0',
           })}
           InputProps={{
             disableUnderline: true,
           }}
+          placeholder = "Aa"
         />
       </Grid>
       <Grid item>
-        <Button type="submit">Send</Button>
+        <Button type="submit"><SendOutlined /></Button>
       </Grid>
     </Grid>
   );
@@ -153,9 +154,8 @@ function ChatRoom() {
         container
         direction="column"
         alignItems="center"
-        style={{ height: "100vh", backgroundColor: "#888", padding: 5 }}
+        style={{ height: "400px", padding: 0 }}
       >
-        <UsernameDialog username={username} setUsername={setUsername} />
 
         <Stack
           spacing={1}
@@ -163,14 +163,14 @@ function ChatRoom() {
             backgroundColor: "#fff",
             height: "100vh",
             width: "100%",
-            borderRadius: theme.shape.borderRadius,
           })}
         >
-          {welcomeMessageView()}
-
-          {messagesView()}
-
-          {controlsView()}
+          <div style={{height: '370px', overflowY: 'scroll'}} ref={scrollRef} >
+            {messagesView()}
+          </div>
+          <div style = {{}} >
+            {controlsView()}
+          </div> 
         </Stack>
       </Grid>
     </form>
