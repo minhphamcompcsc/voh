@@ -21,39 +21,40 @@ interface Bulletin {
   themeClassName: string;
 }
 
-type FieldType = {
-  personSharing?: string;
-  phone_number?: string;
-  address: string;
-  direction?: string;
-  district?: string[];
-  state: string;
-  speed: number;
-  reason?: string;
-  notice?: string;
-};
-
-const { TextArea } = Input;
-
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  console.log('Failed:', errorInfo);
-};
-const { RangePicker } = DatePicker;
-let hideAddingNewsButton = false
-const role = localStorage.getItem('role')
-if (role == 'ROLE_MC' || role == 'ROLE_EDITOR') {
-  hideAddingNewsButton = true
-}
-
-function CustomToolbar() {
-  return (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
-}
-
 const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
+  type FieldType = {
+    personSharing?: string;
+    phone_number?: string;
+    address: string;
+    direction?: string;
+    district?: string[];
+    state: string;
+    speed: number;
+    reason?: string;
+    notice?: string;
+  };
+  
+  const { TextArea } = Input;
+  
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
+    console.log('Failed:', errorInfo);
+  };
+  const { RangePicker } = DatePicker;
+  
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarExport />
+      </GridToolbarContainer>
+    );
+  }
+
+  let hideAddingNewsButton = false
+  const role = localStorage.getItem('role')
+  console.log('role: ', role)
+  if (role == 'ROLE_MC' || role == 'ROLE_EDITOR') {
+    hideAddingNewsButton = true
+  }
   const [form] = Form.useForm();
 
   const userId = window.localStorage.getItem("userId")
