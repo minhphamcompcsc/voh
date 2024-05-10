@@ -44,7 +44,7 @@ const HomeContent: React.FC<ChatGPTProps> = ({ themeClassName }) => {
 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const buttonKey = e.currentTarget.getAttribute('data-key');
-    console.log('Button key:', buttonKey);
+    // console.log('Button key:', buttonKey);
     // window.location.href = buttonKey || '';
     navigate(`${buttonKey}`)
   };
