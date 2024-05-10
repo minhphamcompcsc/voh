@@ -52,7 +52,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
 
   let hideAddingNewsButton = false
   const role = localStorage.getItem('role')
-  console.log('role: ', role)
+  // console.log('role: ', role)
   if (role == 'ROLE_MC' || role == 'ROLE_EDITOR') {
     hideAddingNewsButton = true
   }
@@ -252,7 +252,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                       if(params.row.district == '') {
                         params.row.district = ['Quận khác']
                       }
-                      console.log('params.row.district: ', params.row.district)
+                      // console.log('params.row.district: ', params.row.district)
                       const response = await fetch('/api/updatenews/' + userId, {
                         method: "PATCH",
                         headers: { 'Content-Type': 'application/json' },
@@ -329,19 +329,19 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
 
   let newsToPresent = news
   // newsToPresent = newsToPresent.filter((obj : any) => statusChoice.includes(obj['status']));
-  if (role != 'ROLE_ADMIN' && newsToPresent[0] != null) {
+  if (role != 'ROLE_ADMIN' && newsToPresent.length >= 1 && newsToPresent[0] != null) {
     const to_remove = ['Lưu trữ']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }
-  if (role == 'ROLE_MC' && newsToPresent[0] != null) {
+  if (role == 'ROLE_MC' && newsToPresent.length >= 1 && newsToPresent[0] != null) {
     const to_remove = ['Nháp', 'Chờ duyệt']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }
-  if (role == 'ROLE_EDITOR' && newsToPresent[0] != null) {
+  if (role == 'ROLE_EDITOR' && newsToPresent.length >= 1 && newsToPresent[0] != null) {
     const to_remove = ['Nháp']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }
-
+  // console.log('newsToPresent: ', newsToPresent)
   return (
     <div>
       <div style={{
@@ -440,7 +440,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                 hideFooterSelectedRowCount={true}
                 processRowUpdate={async (row) => {
 
-                  console.log('row: ', row)
+                  // console.log('row: ', row)
                   const response = await fetch('/api/updatenews/' + userId, {
                     method: "PATCH",
                     headers: { 'Content-Type': 'application/json' },
@@ -614,7 +614,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
                         style={{ width: '100%' }}
                         placeholder="Quận"
                         onChange={(value: string[]) => {
-                          console.log(`selected ${value}`);
+                          // console.log(`selected ${value}`);
                         }
                         }
                         options={Districts}

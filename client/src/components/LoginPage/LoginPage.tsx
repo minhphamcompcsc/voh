@@ -17,7 +17,7 @@ const LoginPage = () => {
   const { register, handleSubmit, formState: { errors }, } = useForm<LoginFormValue>()
   const login: SubmitHandler<LoginFormValue> = async (data : any) => {
     // Send an authentication request to the flask server
-    console.log('data: ', data)
+    // console.log('data: ', data)
     const response = await fetch('/api/authenticate',{
       method: "POST",
       headers: {'Content-Type': 'application/json'},

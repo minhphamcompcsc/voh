@@ -10,7 +10,7 @@ const Router = () => {
     const ProtectedRoute = ({ element }: any): any => {
         const isLogged = window.localStorage.getItem("loggedIn");
         
-        console.log(isLogged)
+        // console.log(isLogged)
         if (!isLogged) {
             return <Navigate to="/dangnhap" />;
         }
