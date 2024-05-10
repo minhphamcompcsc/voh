@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Stack, Grid, Box, TextField, Button, Typography } from "@mui/material";
 import { SendOutlined } from '@ant-design/icons'
 import io from "socket.io-client";
+import { socket_port } from "../../../assets/ports";
 
-const socket = io("http://localhost:5000");
+const socket = io(socket_port);
 
 function ChatRoom() {
   const scrollRef = useRef();

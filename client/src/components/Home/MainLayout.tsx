@@ -18,6 +18,7 @@ import Reason from './Hometag/Reason';
 import { PasswordProps } from 'antd/es/input';
 import ChatRoom from "./ChatRoom";
 import { io } from "socket.io-client";
+import { socket_port } from '../../assets/ports';
 
 const { Header, Sider} =  Layout;
 type FieldType = {
@@ -121,7 +122,7 @@ const Home: React.FC = () => {
       title = ' ';
     } 
   
-    const socket = io("http://127.0.0.1:5000", {
+    const socket = io(socket_port, {
       transports: ["websocket"]
     });
 
