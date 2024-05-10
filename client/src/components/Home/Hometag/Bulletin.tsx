@@ -14,6 +14,7 @@ import axios from 'axios';
 import type { Dayjs } from 'dayjs';
 import unidecode from 'unidecode';
 import { io } from "socket.io-client";
+import { socket_port } from '../../../assets/ports';
 
 import socketIOClient from 'socket.io-client';
 
@@ -111,7 +112,7 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
     setNews(_news_)
   }
   
-  const socket = io("http://127.0.0.1:5000", {
+  const socket = io(socket_port, {
     transports: ["websocket"]
   });
 
@@ -328,15 +329,15 @@ const Bulletin: React.FC<Bulletin> = ({ themeClassName }) => {
 
   let newsToPresent = news
   // newsToPresent = newsToPresent.filter((obj : any) => statusChoice.includes(obj['status']));
-  if (role != 'ROLE_ADMIN' && newsToPresent[0] != null && newsToPresent.length > 1) {
+  if (role != 'ROLE_ADMIN' && newsToPresent[0] != null) {
     const to_remove = ['Lưu trữ']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }
-  if (role == 'ROLE_MC' && newsToPresent[0] != null && newsToPresent.length > 1) {
+  if (role == 'ROLE_MC' && newsToPresent[0] != null) {
     const to_remove = ['Nháp', 'Chờ duyệt']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }
-  if (role == 'ROLE_EDITOR' && newsToPresent[0] != null && newsToPresent.length > 1) {
+  if (role == 'ROLE_EDITOR' && newsToPresent[0] != null) {
     const to_remove = ['Nháp']
     newsToPresent = newsToPresent.filter((obj: any) => !to_remove.includes(obj['status']));
   }

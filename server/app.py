@@ -182,7 +182,6 @@ def handle_send_message(data):
 
     emit('receive_message', data, broadcast=True)
 
-
 @app.route('/api/changepassword/<userId>', methods=['POST'])
 def changepassword(userId : str):
     # print(userId)
